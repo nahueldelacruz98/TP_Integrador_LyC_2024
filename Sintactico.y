@@ -13,8 +13,13 @@ FILE  *yyin;
 
 %}
 
-%token CTE
+%token CONST_INT
 %token CONST_STRING
+%token DECL_VAR_INIT
+%token DECL_STRING
+%token DECL_INT
+%token DECL_FLOAT
+%token KC
 %token ID
 %token OP_AS
 %token OP_SUM
@@ -46,7 +51,7 @@ termino:
 
 factor: 
       ID {printf("    ID es Factor \n");}
-      | CTE {printf("    CTE es Factor\n");}
+      | CONST_INT {printf("    CONST_INT es Factor\n");}
 	| PA expresion PC {printf("    Expresion entre parentesis es Factor\n");}
      	;
 %%

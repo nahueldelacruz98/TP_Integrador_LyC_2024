@@ -18,11 +18,11 @@ int yyerror(void);
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
 
-CTE		        {DIGITO}+
 CONST_FLOAT     ({DIGITO}+"."|"."{DIGITO}+|{DIGITO}+"."{DIGITO}+)
 CONST_STRING    \"({LETRA}|{DIGITO}|[ \t\n])*\"
 CONST_INT       {DIGITO}+
 CONST_GEN       {CONST_FLOAT}|{CONST_STRING}|{CONST_INT}
+CONST_NUMERO    "-"?({CONST_FLOAT}|{CONST_INT})
 
 ID			    {LETRA}({LETRA}|{DIGITO})*
 OP_AS   		":""="
@@ -42,30 +42,37 @@ COMP_EQ         "=="
 COMP_DIST	    "<>"
 COMP_GEN	    {COMP_MAY}|{COMP_MEN}|{COMP_MAY_EQ}|{COMP_MEN_EQ}|{COMP_EQ}|{COMP_DIST}
 
-DECL_VAR_INIT   "i""n""i""t"" "?{KA}
+DECL_VAR_INIT   "init"" "?{KA}
 START_DECL      {ID}(","{ID})*":"
-DECL_STRING     {START_DECL}"S""t""r""i""n""g"
-DECL_FLOAT      {START_DECL}"F""l""o""a""t"
-DECL_INT        {START_DECL}"I""n""t"
+DECL_STRING     {START_DECL}"String"
+DECL_FLOAT      {START_DECL}"Float"
+DECL_INT        {START_DECL}"Int"
 
 COND_GEN	({ID}|{CONST_GEN})" "{COMP_GEN}" "({ID}|{CONST_GEN})
-COND_OP_NOT	"N""O""T"" "
-COND_OP_AND	" ""A""N""D"" "
-COND_OP_OR	" ""O""R"" "
+COND_OP_NOT	"NOT"" "
+COND_OP_AND	" "AND"" "
+COND_OP_OR	" "OR"" "
 CONDICION	{PA}{COND_OP_NOT}?{COND_GEN}(({COND_OP_AND}|{COND_OP_OR}){COND_OP_NOT}?{COND_GEN})*{PC}
 
-START_WHILE	"m""i""e""n""t""r""a""s"" "{CONDICION}{KA}
+START_WHILE	"mientras"" "{CONDICION}{KA}
 
-START_IF	"s""i"" "{CONDICION}"" "?{KA}
-START_ELSE	{KC}" ""s""i""n"o"" "?{KA}
+START_IF	"si"" "{CONDICION}"" "?{KA}
+START_ELSE	{KC}" ""sino"" "?{KA}
 
 COMENTARIO	"*""-"({LETRA}|{DIGITO})*"-""*"
 
+LISTA_NUM	    "["{CONST_NUMERO}(","{CONST_NUMERO})*"]"
+FUNCT_GPP       "getPenultimatePosition"{PA}{CONST_INT}";"{LISTA_NUM}{PC}
+
+CONST_BINARY        ("0"|"1")+
+TIPO_ELEM_LISTA     ({CONST_BINARY}|{CONST_NUMERO}|{ID})
+LISTA_NUM_ID        "["{TIPO_ELEM_LISTA}(","{TIPO_ELEM_LISTA})*"]"
+FUNCT_BC            "binaryCount"{PA}{LISTA_NUM_ID}{PC}
+
 %%
       
-{CTE}			{printf("\nConstante: %s\n", yytext);return CTE;}
 {CONST_STRING}  {printf("\nString: %s\n", yytext);return CONST_STRING;}
-{ID}			{printf("\nIdentificador: %s\n", yytext);return ID;}
+{ID}
 {OP_SUM}		{printf("\nSuma: %s\n", yytext);return OP_SUM;}
 {OP_AS}			{printf("\nAsignacion: %s\n", yytext);return OP_AS;}
 {OP_MUL}		{printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
@@ -79,6 +86,13 @@ COMENTARIO	"*""-"({LETRA}|{DIGITO})*"-""*"
 "\n\t"
 " "             		
 "\r\n"  
+
+{DECL_VAR_INIT}     {printf("\nComienzo de declaracion de variables...\n");}
+{DECL_STRING}       {printf("\nLista de variables de tipo String: %s\n", yytext);}
+{DECL_INT}          {printf("\nLista de variables de tipo Integer: %s\n", yytext);}
+{DECL_FLOAT}        {printf("\nLista de variables de tipo Float: %s\n", yytext);}
+{KC}                
+
 .			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
 %%

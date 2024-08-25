@@ -1,1 +1,5 @@
-"prueba de string"
+init{
+    x,y,z:Int
+    strPrueba,strPrueba2:String
+    dblLista1,dblLista2,dblLista:Float
+}
