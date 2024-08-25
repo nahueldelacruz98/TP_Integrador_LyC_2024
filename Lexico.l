@@ -49,17 +49,17 @@ DECL_FLOAT      {START_DECL}"Float"
 DECL_INT        {START_DECL}"Int"
 
 COND_GEN	({ID}|{CONST_GEN})" "{COMP_GEN}" "({ID}|{CONST_GEN})
-COND_OP_NOT	"NOT"" "
-COND_OP_AND	" "AND"" "
-COND_OP_OR	" "OR"" "
+COND_OP_NOT	"NOT "
+COND_OP_AND	" AND "
+COND_OP_OR	" OR "
 CONDICION	{PA}{COND_OP_NOT}?{COND_GEN}(({COND_OP_AND}|{COND_OP_OR}){COND_OP_NOT}?{COND_GEN})*{PC}
 
 START_WHILE	"mientras"" "{CONDICION}{KA}
 
 START_IF	"si"" "{CONDICION}"" "?{KA}
-START_ELSE	{KC}" ""sino"" "?{KA}
+START_ELSE	{KC}" sino"" "?{KA}
 
-COMENTARIO	"*""-"({LETRA}|{DIGITO})*"-""*"
+COMENTARIO	"*-"({LETRA}|{DIGITO})*"-*"
 
 LISTA_NUM	    "["{CONST_NUMERO}(","{CONST_NUMERO})*"]"
 FUNCT_GPP       "getPenultimatePosition"{PA}{CONST_INT}";"{LISTA_NUM}{PC}
