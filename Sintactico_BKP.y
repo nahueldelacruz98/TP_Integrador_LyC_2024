@@ -15,7 +15,7 @@ FILE  *yyin;
 
 %token CONST_INT
 %token CONST_STRING
-%token INIT_VAR
+%token DECL_VAR_INIT
 %token DECL_STRING
 %token DECL_INT
 %token DECL_FLOAT
@@ -30,6 +30,7 @@ FILE  *yyin;
 %token PC
 %token OP_ARIT
 %token KA
+%token KC
 %token CORCH_A
 %token CORCH_C
 %token DOS_PUNTOS
@@ -45,6 +46,11 @@ FILE  *yyin;
 %token COMP_EQ
 %token COMP_DIST
 
+%token INIT_VAR
+%token DECL_STRING
+%token DECL_FLOAT
+%token DECL_INT
+
 %token START_WHILE
 %token START_IF
 %token START_ELSE
@@ -54,6 +60,8 @@ FILE  *yyin;
 %token CONST_FLOAT
 %token CONST_FLOAT_INT
 %token CONST_FLOAT_DEC
+%token CONST_STRING
+%token CONST_INT
 
 %token COND_OP_NOT
 %token COND_OP_AND
@@ -65,26 +73,30 @@ FILE  *yyin;
 
 
 %%
-variables:  	   
-          INIT_VAR KA declaracion KC {printf(" FIN de declaraciones.\n");}
-          ;
+sentencia:  	   
+	asignacion {printf(" FIN\n");} ;
 
-declaracion: 
-          conj_var DOS_PUNTOS tipo_var {printf(" FIN declaracion de otro tipo\n");}
-          | declaracion conj_var DOS_PUNTOS tipo_var {printf(" FIN declaracion de tipos\n");}
-	  ;   
+asignacion: 
+          ID OP_AS expresion {printf("    ID = Expresion es ASIGNACION\n");}
+	  ;
 
-conj_var:
-         conj_var COMA ID {printf(" otra variable del mismo tipo.\n");}
-         | ID {printf(" Variable identificada\n");}
-         ;
-         
-tipo_var: 
-       DECL_STRING {printf(" Tipo string\n");}
-       | DECL_FLOAT {printf(" Tipo Float\n");}
-       | DECL_INT {printf(" Tipo Integer\n");} 
+expresion:
+         termino {printf("    Termino es Expresion\n");}
+	 |expresion OP_SUM termino {printf("    Expresion+Termino es Expresion\n");}
+	 |expresion OP_RES termino {printf("    Expresion-Termino es Expresion\n");}
+	 ;
+
+termino: 
+       factor {printf("    Factor es Termino\n");}
+       |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
+       |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
        ;
 
+factor: 
+      ID {printf("    ID es Factor \n");}
+      | CONST_INT {printf("    CONST_INT es Factor\n");}
+	| PA expresion PC {printf("    Expresion entre parentesis es Factor\n");}
+     	;
 %%
 
 
