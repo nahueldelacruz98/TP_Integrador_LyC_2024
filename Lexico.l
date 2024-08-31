@@ -55,9 +55,7 @@ START_ELSE	        "sino"
 START_LECTURA       "leer"
 START_ESCRITURA     "escribir"
 
-CONST_FLOAT         {DIGITO}+"."{DIGITO}+
-CONST_FLOAT_INT     {DIGITO}+"."
-CONST_FLOAT_DEC     "."{DIGITO}+
+CONST_FLOAT         "-"?({DIGITO}+"."{DIGITO}+|{DIGITO}+"."|"."{DIGITO}+)
 CONST_STRING        {COMILLA}[^\"]*{COMILLA}
 CONST_INT           "-"?{DIGITO}+
 
@@ -72,10 +70,10 @@ FUNCT_GPP           "getPenultimatePosition"
 %%
 
 "init"              {printf("\nInicializacion de variables\n"); return INIT_VAR;}
-"String"            {printf("\nString\n"); return DECL_STRING;}
-"Float"             {printf("\nInteger\n"); return DECL_FLOAT;}
-"Int"               {printf("\nInteger\n"); return DECL_INT;}
-"mientras"          {return START_WHILE;}
+"String"            {return DECL_STRING;}
+"Float"             {return DECL_FLOAT;}
+"Int"               {return DECL_INT;}
+"mientras"          {printf("\nComienzo ciclo while:\n"); return START_WHILE;}
 "si"                {return START_IF;}
 "sino"              {return START_ELSE;}
 "leer"              {return START_LECTURA;}
@@ -87,9 +85,8 @@ FUNCT_GPP           "getPenultimatePosition"
 "getPenultimatePosition"    {return FUNCT_GPP;}
 
 {CONST_FLOAT}       {return CONST_FLOAT;}
-{CONST_FLOAT_INT}   {return CONST_FLOAT_INT;}
-{CONST_FLOAT_DEC}   {return CONST_FLOAT_DEC;}
 {CONST_STRING}      {printf("\nString: %s\n", yytext); return CONST_STRING;}
+{CONST_INT}         {return CONST_INT;}
 
 {ID}            {printf("\nID identificado: %s\n", yytext); return ID;}
 

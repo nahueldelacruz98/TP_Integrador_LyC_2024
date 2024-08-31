@@ -1,7 +1,7 @@
-init{
-    x,y,z:Int
-    strPrueba,strPrueba2,lecturaArchivo:String
-    dblLista1,dblLista2,dblLista:Float
+init {
+    x, y, z: Int
+    strPrueba ,strPrueba2, lecturaArchivo: String
+    dblLista1, dblLista2, dblLista: Float
 }
 
 *-  Codigo que invoca todos los temas comunes  -*

@@ -52,8 +52,6 @@ FILE  *yyin;
 %token START_ESCRITURA
 
 %token CONST_FLOAT
-%token CONST_FLOAT_INT
-%token CONST_FLOAT_DEC
 
 %token COND_OP_NOT
 %token COND_OP_AND
@@ -65,6 +63,13 @@ FILE  *yyin;
 
 
 %%
+
+linea_codigo:
+          codigo | linea_codigo codigo;
+
+codigo:
+          variables | asignacion_variables;
+
 variables:  	   
           INIT_VAR KA declaracion KC {printf(" FIN de declaraciones.\n");}
           ;
@@ -84,6 +89,14 @@ tipo_var:
        | DECL_FLOAT {printf(" Tipo Float\n");}
        | DECL_INT {printf(" Tipo Integer\n");} 
        ;
+
+
+asignacion_variables:
+      ID OP_AS constante_variable {printf(" Fin asignacion de variable\n");} ;
+
+
+constante_variable:
+      CONST_INT | CONST_FLOAT | CONST_STRING ;
 
 %%
 

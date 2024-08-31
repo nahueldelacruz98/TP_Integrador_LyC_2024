@@ -3,3 +3,14 @@ init {
     strPrueba ,strPrueba2, lecturaArchivo: String
     dblLista1, dblLista2, dblLista: Float
 }
+
+x := 14
+y := 10
+z := 1
+
+strPrueba := "Test1"
+strPrueba2 := "Test2"
+
+dblLista := 1.43
+dblLista1 := -.12
+dblLista2 := 123.
