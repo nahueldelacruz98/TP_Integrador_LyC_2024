@@ -4,6 +4,8 @@ init {
     dblLista1, dblLista2, dblLista: Float
 }
 
+*-  Codigo que invoca todos los temas comunes  -*
+
 x := 14
 y := 10
 z := 1
@@ -14,3 +16,7 @@ strPrueba2 := "Test2"
 dblLista := 1.43
 dblLista1 := -.12
 dblLista2 := 123.
+
+mientras (x > y) {
+    y =: y + 1
+}

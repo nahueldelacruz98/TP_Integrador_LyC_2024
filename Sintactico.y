@@ -10,6 +10,7 @@ FILE  *yyin;
   int yyerror();
   int yylex();
 
+extern char* yytext;
 
 %}
 
@@ -36,8 +37,7 @@ FILE  *yyin;
 %token COMA
 %token COMILLA
 %token BLANCOS
-%token COMENTARIO_INIT
-%token COMENTARIO_FIN
+%token COMENTARIO
 %token COMP_MAY
 %token COMP_MEN
 %token COMP_MAY_EQ
@@ -65,17 +65,19 @@ FILE  *yyin;
 %%
 
 linea_codigo:
-          codigo | linea_codigo codigo;
+          codigo 
+          | linea_codigo codigo
+          | linea_codigo while_sentence KA linea_codigo KC {printf(" Fin sentencia WHILE\n");} ;
 
 codigo:
-          variables | asignacion_variables;
+          variables | asignacion_variables | COMENTARIO { printf("Comentario: %s\n",yytext); };
 
 variables:  	   
           INIT_VAR KA declaracion KC {printf(" FIN de declaraciones.\n");}
           ;
 
 declaracion: 
-          conj_var DOS_PUNTOS tipo_var {printf(" FIN declaracion de otro tipo\n");}
+          conj_var DOS_PUNTOS tipo_var {printf(" FIN declaracion de otro tipo de variable.\n");}
           | declaracion conj_var DOS_PUNTOS tipo_var {printf(" FIN declaracion de tipos\n");}
 	  ;   
 
@@ -98,6 +100,26 @@ asignacion_variables:
 constante_variable:
       CONST_INT | CONST_FLOAT | CONST_STRING ;
 
+while_sentence:
+      START_WHILE PA condicion_multiple PC {printf(" Inicio sentencia WHILE\n");} ;
+
+condicion_multiple:
+      condicion
+      | COND_OP_NOT condicion
+      | condicion_multiple COND_OP_AND condicion
+      | condicion_multiple COND_OP_OR condicion
+      | condicion_multiple COND_OP_AND COND_OP_NOT condicion
+      | condicion_multiple COND_OP_OR COND_OP_NOT condicion ;
+
+condicion:
+      constante_variable comparador constante_variable
+      | constante_variable comparador ID
+      | ID comparador constante_variable
+      | ID comparador ID ;
+
+comparador:
+      COMP_MAY | COMP_MEN | COMP_EQ | COMP_MAY_EQ | COMP_MEN_EQ | COMP_DIST ;
+
 %%
 
 
@@ -117,9 +139,9 @@ int main(int argc, char *argv[])
 	fclose(yyin);
         return 0;
 }
+
 int yyerror(void)
      {
        printf("Error Sintactico\n");
 	 exit (1);
      }
-

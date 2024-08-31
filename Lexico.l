@@ -34,8 +34,7 @@ CORCH_C         "]"
 DOS_PUNTOS      ":"
 COMA            ","
 COMILLA         \"
-COMENTARIO_INIT	"*-"
-COMENTARIO_FIN  "-*"
+COMENTARIO  	"*-"[^\"]*"-*"
 
 COMP_MAY        ">"
 COMP_MEN        "<"
@@ -73,7 +72,7 @@ FUNCT_GPP           "getPenultimatePosition"
 "String"            {return DECL_STRING;}
 "Float"             {return DECL_FLOAT;}
 "Int"               {return DECL_INT;}
-"mientras"          {printf("\nComienzo ciclo while:\n"); return START_WHILE;}
+"mientras"          {return START_WHILE;}
 "si"                {return START_IF;}
 "sino"              {return START_ELSE;}
 "leer"              {return START_LECTURA;}
@@ -89,18 +88,27 @@ FUNCT_GPP           "getPenultimatePosition"
 {CONST_INT}         {return CONST_INT;}
 
 {ID}            {printf("\nID identificado: %s\n", yytext); return ID;}
+{COMENTARIO}    {return COMENTARIO;}
 
 {OP_SUM}		{printf(" suma ");return OP_SUM;}
 {OP_AS}			{printf(" asignacion ");return OP_AS;}
 {OP_MUL}		{printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
 {OP_RES}		{printf("\nResta: %s\n", yytext);return OP_RES;}
 {OP_DIV}		{printf("\nDivision: %s\n", yytext);return OP_DIV;}
+{OP_ARIT}       {return OP_ARIT;}
 {PA}			{printf("\nParAbre: %s\n", yytext);return PA;}
 {PC}			{printf("\nParCierra: %s\n", yytext);return PC;}
 {KA}            {printf("\nAbre llave: %s\n", yytext);return KA;}
 {KC}            {printf("\nCierra llave: %s\n", yytext);return KC;}
 {COMA}          {return COMA;}
 {DOS_PUNTOS}    {return DOS_PUNTOS;}
+
+{COMP_MAY}          {return COMP_MAY;}
+{COMP_MEN}          {return COMP_MEN;}
+{COMP_MEN_EQ}       {return COMP_MEN_EQ;}
+{COMP_MAY_EQ}       {return COMP_MAY_EQ;}
+{COMP_EQ}           {return COMP_EQ;}
+{COMP_DIST}         {return COMP_DIST;}
 
 "\n"      		
 "\t"
