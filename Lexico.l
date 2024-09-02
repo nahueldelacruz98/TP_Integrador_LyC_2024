@@ -7,7 +7,6 @@ FILE  *yyin;
 int yylval;
 char *yyltext;
 
-
 int yyerror(void);
 
 %}
@@ -68,13 +67,13 @@ FUNCT_GPP           "getPenultimatePosition"
 
 %%
 
-"init"              {printf("\nInicializacion de variables\n"); return INIT_VAR;}
+"init"              {printf("\nInicializacion de variables...\n"); return INIT_VAR;}
 "String"            {return DECL_STRING;}
 "Float"             {return DECL_FLOAT;}
 "Int"               {return DECL_INT;}
-"mientras"          {return START_WHILE;}
-"si"                {return START_IF;}
-"sino"              {return START_ELSE;}
+"mientras"          {printf("\nComienzo del ciclo WHILE...\n"); return START_WHILE;}
+"si"                {printf("\nComienzo de sentencia IF...\n"); return START_IF;}
+"sino"              {printf("\nExtension IF ELSE...\n"); return START_ELSE;}
 "leer"              {return START_LECTURA;}
 "escribir"          {return START_ESCRITURA;}
 "NOT"               {return COND_OP_NOT;}
@@ -84,22 +83,23 @@ FUNCT_GPP           "getPenultimatePosition"
 "getPenultimatePosition"    {return FUNCT_GPP;}
 
 {CONST_FLOAT}       {return CONST_FLOAT;}
-{CONST_STRING}      {printf("\nString: %s\n", yytext); return CONST_STRING;}
+{CONST_STRING}      {return CONST_STRING;}
 {CONST_INT}         {return CONST_INT;}
 
-{ID}            {printf("\nID identificado: %s\n", yytext); return ID;}
+{ID}                {  return ID; }
+
 {COMENTARIO}    {return COMENTARIO;}
 
 {OP_SUM}		{printf(" suma ");return OP_SUM;}
-{OP_AS}			{printf(" asignacion ");return OP_AS;}
+{OP_AS}			{return OP_AS;}
 {OP_MUL}		{printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
 {OP_RES}		{printf("\nResta: %s\n", yytext);return OP_RES;}
 {OP_DIV}		{printf("\nDivision: %s\n", yytext);return OP_DIV;}
-{OP_ARIT}       {return OP_ARIT;}
-{PA}			{printf("\nParAbre: %s\n", yytext);return PA;}
-{PC}			{printf("\nParCierra: %s\n", yytext);return PC;}
-{KA}            {printf("\nAbre llave: %s\n", yytext);return KA;}
-{KC}            {printf("\nCierra llave: %s\n", yytext);return KC;}
+{OP_ARIT}       {printf("\nInicio operacion aritmetica.\n"); return OP_ARIT;}
+{PA}			{return PA;}
+{PC}			{return PC;}
+{KA}            {return KA;}
+{KC}            {return KC;}
 {COMA}          {return COMA;}
 {DOS_PUNTOS}    {return DOS_PUNTOS;}
 

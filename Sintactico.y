@@ -3,14 +3,30 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "y.tab.h"
 int yystopparser=0;
-FILE  *yyin;
+FILE *yyin;
+FILE *symbol_file;
 
-  int yyerror();
-  int yylex();
+int yyerror();
+int yylex();
 
 extern char* yytext;
+
+void abrir_archivo() {
+    symbol_file = fopen("simbolos.txt", "w");
+    if (!symbol_file) {
+        fprintf(stderr, "Error al abrir el archivo simbolos.txt\n");
+        exit(1);
+    }
+}
+
+void cerrar_archivo() {
+    if (symbol_file) {
+        fclose(symbol_file);
+    }
+}
 
 %}
 
@@ -67,41 +83,45 @@ extern char* yytext;
 linea_codigo:
           codigo 
           | linea_codigo codigo
-          | linea_codigo while_sentence KA linea_codigo KC {printf(" Fin sentencia WHILE\n");} ;
+          | linea_codigo while_sentence KA linea_codigo KC;
 
 codigo:
-          variables | asignacion_variables | COMENTARIO { printf("Comentario: %s\n",yytext); };
+          variables | 
+          asignacion_variables {printf("Sentencia de asignacion => %s\n\n",yytext); } | 
+          sentencia_aritmetica |
+          COMENTARIO { printf("Comentario: %s\n\n",yytext); };
 
 variables:  	   
-          INIT_VAR KA declaracion KC {printf(" FIN de declaraciones.\n");}
+          INIT_VAR KA declaracion KC {printf("FIN de declaracion de variables.\n\n");}
           ;
 
 declaracion: 
-          conj_var DOS_PUNTOS tipo_var {printf(" FIN declaracion de otro tipo de variable.\n");}
-          | declaracion conj_var DOS_PUNTOS tipo_var {printf(" FIN declaracion de tipos\n");}
+          conj_var DOS_PUNTOS tipo_var 
+          | declaracion conj_var DOS_PUNTOS tipo_var
 	  ;   
 
 conj_var:
-         conj_var COMA ID {printf(" otra variable del mismo tipo.\n");}
-         | ID {printf(" Variable identificada\n");}
+         conj_var COMA ID {  fprintf(symbol_file, "%s\n", yytext);
+            printf(",'%s'",yytext);}
+         | ID {  fprintf(symbol_file, "%s\n", yytext);
+            printf("Variable/s '%s'",yytext);}
          ;
          
 tipo_var: 
-       DECL_STRING {printf(" Tipo string\n");}
-       | DECL_FLOAT {printf(" Tipo Float\n");}
-       | DECL_INT {printf(" Tipo Integer\n");} 
+       DECL_STRING {printf(": tipo String\n");}
+       | DECL_FLOAT {printf(": tipo Float\n");}
+       | DECL_INT {printf(": tipo Integer\n");} 
        ;
 
 
 asignacion_variables:
-      ID OP_AS constante_variable {printf(" Fin asignacion de variable\n");} ;
-
+      ID OP_AS constante_variable ;
 
 constante_variable:
       CONST_INT | CONST_FLOAT | CONST_STRING ;
 
 while_sentence:
-      START_WHILE PA condicion_multiple PC {printf(" Inicio sentencia WHILE\n");} ;
+      START_WHILE PA condicion_multiple PC {printf("Fin sentencia WHILE\n\n");} ;
 
 condicion_multiple:
       condicion
@@ -120,8 +140,19 @@ condicion:
 comparador:
       COMP_MAY | COMP_MEN | COMP_EQ | COMP_MAY_EQ | COMP_MEN_EQ | COMP_DIST ;
 
-%%
+sentencia_aritmetica:
+      ID OP_ARIT operacion_aritmetica ;
 
+operacion_aritmetica:
+      variable_aritmetica OP_SUM variable_aritmetica
+      | variable_aritmetica OP_RES variable_aritmetica
+      | variable_aritmetica OP_MUL variable_aritmetica
+      | variable_aritmetica OP_DIV variable_aritmetica ;
+
+variable_aritmetica:
+      ID | CONST_FLOAT | CONST_INT ;
+
+%%
 
 int main(int argc, char *argv[])
 {
@@ -132,9 +163,9 @@ int main(int argc, char *argv[])
     }
     else
     { 
-        
+        abrir_archivo();
         yyparse();
-        
+        cerrar_archivo();
     }
 	fclose(yyin);
         return 0;
