@@ -14,20 +14,6 @@ int yylex();
 
 extern char* yytext;
 
-void abrir_archivo() {
-    symbol_file = fopen("simbolos.txt", "w");
-    if (!symbol_file) {
-        fprintf(stderr, "Error al abrir el archivo simbolos.txt\n");
-        exit(1);
-    }
-}
-
-void cerrar_archivo() {
-    if (symbol_file) {
-        fclose(symbol_file);
-    }
-}
-
 %}
 
 %token CONST_INT
@@ -83,12 +69,15 @@ void cerrar_archivo() {
 linea_codigo:
           codigo 
           | linea_codigo codigo
-          | linea_codigo while_sentence KA linea_codigo KC;
+          ;
 
 codigo:
           variables | 
-          asignacion_variables {printf("Sentencia de asignacion => %s\n\n",yytext); } | 
+          asignacion_variables {printf("\n"); } | 
           sentencia_aritmetica |
+          while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n"); } |
+          if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n"); }|
+          KC START_ELSE KA {printf("\nEn caso de que no se cumpla la condicion de IF, realizara el siguiente codigo:\n\n");} |
           COMENTARIO { printf("Comentario: %s\n\n",yytext); };
 
 variables:  	   
@@ -102,15 +91,14 @@ declaracion:
 
 conj_var:
          conj_var COMA ID {  fprintf(symbol_file, "%s\n", yytext);
-            printf(",'%s'",yytext);}
-         | ID {  fprintf(symbol_file, "%s\n", yytext);
-            printf("Variable/s '%s'",yytext);}
+            printf(", ");}
+         | ID {  printf(", "); fprintf(symbol_file, "%s\n", yytext);}
          ;
          
 tipo_var: 
-       DECL_STRING {printf(": tipo String\n");}
-       | DECL_FLOAT {printf(": tipo Float\n");}
-       | DECL_INT {printf(": tipo Integer\n");} 
+       DECL_STRING {printf(": variable/s de tipo String.\n");}
+       | DECL_FLOAT {printf(": variable/s de tipo Float.\n");}
+       | DECL_INT {printf(": variable/s de tipo Integer.\n");} 
        ;
 
 
@@ -118,18 +106,23 @@ asignacion_variables:
       ID OP_AS constante_variable ;
 
 constante_variable:
-      CONST_INT | CONST_FLOAT | CONST_STRING ;
+      CONST_INT {fprintf(symbol_file, "%s\n", yytext);}
+      | CONST_FLOAT {fprintf(symbol_file, "%s\n", yytext);}
+      | CONST_STRING {fprintf(symbol_file, "%s\n", yytext);}
+      ;
 
 while_sentence:
-      START_WHILE PA condicion_multiple PC {printf("Fin sentencia WHILE\n\n");} ;
+      START_WHILE PA condicion_multiple PC {printf(" entonces hace el siguiente codigo:\n\n"); };
+
+if_sentence:
+      START_IF PA condicion_multiple PC {printf(" entonces hace el siguiente codigo:\n\n"); };
 
 condicion_multiple:
       condicion
       | COND_OP_NOT condicion
-      | condicion_multiple COND_OP_AND condicion
-      | condicion_multiple COND_OP_OR condicion
-      | condicion_multiple COND_OP_AND COND_OP_NOT condicion
-      | condicion_multiple COND_OP_OR COND_OP_NOT condicion ;
+      | condicion_multiple COND_OP_AND condicion_multiple
+      | condicion_multiple COND_OP_OR condicion_multiple
+      ;
 
 condicion:
       constante_variable comparador constante_variable
@@ -153,6 +146,20 @@ variable_aritmetica:
       ID | CONST_FLOAT | CONST_INT ;
 
 %%
+
+void abrir_archivo() {
+    symbol_file = fopen("symbol-table.txt", "w");
+    if (!symbol_file) {
+        fprintf(stderr, "Error al abrir el archivo simbolos.txt\n");
+        exit(1);
+    }
+}
+
+void cerrar_archivo() {
+    if (symbol_file) {
+        fclose(symbol_file);
+    }
+}
 
 int main(int argc, char *argv[])
 {

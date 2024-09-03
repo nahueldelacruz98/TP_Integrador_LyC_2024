@@ -8,7 +8,7 @@ init {
 
 x := 14
 y := 10
-z := 1
+z := 2
 
 strPrueba := "Test1"
 strPrueba2 := "Test2"
@@ -17,6 +17,12 @@ dblLista := 1.43
 dblLista1 := -.12
 dblLista2 := 123.
 
-mientras (x > y) {
-    y =: y + 1
+mientras (x >= y) {
+    si (y <= x AND NOT z == 1) {
+        y =: y + 1
+    } sino {
+            *- Y es mayor a X -*
+    }
 }
+
+
