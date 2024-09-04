@@ -92,13 +92,13 @@ declaracion:
 
 conj_var:
       conj_var COMA ID {
-            Simbolo simbolo = {"", "", "", 0};
+            Simbolo simbolo = {"", "", "---", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
             printf(", ");
       }
       | ID {
-            Simbolo simbolo = {"", "", "", 0};
+            Simbolo simbolo = {"", "", "---", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
       } ;
@@ -124,12 +124,16 @@ constante_variable:
             Simbolo simbolo = {"", "", "", sizeof(float)};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
+            snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));
             write_symbol_table(simbolo);
       }
       | CONST_STRING {
-            Simbolo simbolo = {"", "", "", strlen(yytext)};
+            int len = ((int) strlen(yytext)) - 2;
+            Simbolo simbolo = {"", "", "", len};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%.*s", len, yytext + 1);
+            snprintf(simbolo.valor, MAX_LENGTH, "%.*s", len, yytext + 1);
             write_symbol_table(simbolo);
       }
       ;
