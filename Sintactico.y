@@ -134,13 +134,27 @@ comparador:
       COMP_MAY | COMP_MEN | COMP_EQ | COMP_MAY_EQ | COMP_MEN_EQ | COMP_DIST ;
 
 sentencia_aritmetica:
-      ID OP_ARIT operacion_aritmetica ;
-
-operacion_aritmetica:
-      variable_aritmetica OP_SUM variable_aritmetica
-      | variable_aritmetica OP_RES variable_aritmetica
-      | variable_aritmetica OP_MUL variable_aritmetica
-      | variable_aritmetica OP_DIV variable_aritmetica ;
+      ID OP_ARIT expresion 
+	;
+ 
+expresion:
+         termino {printf("    Termino es Expresion\n");}
+	 |expresion OP_SUM termino {printf("    Expresion+Termino es Expresion\n");}
+	 |expresion OP_RES termino {printf("    Expresion-Termino es Expresion\n");}
+	 ;
+ 
+termino: 
+       factor {printf("    Factor es Termino\n");}
+       |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
+       |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
+       ;
+ 
+factor: 
+      ID {printf("    ID es Factor \n");}
+      | variable_aritmetica {printf("    CTE es Factor\n");}
+	| PA expresion PC {printf("    Expresion entre parentesis es Factor\n");}
+     	;
+ 
 
 variable_aritmetica:
       ID | CONST_FLOAT | CONST_INT ;
