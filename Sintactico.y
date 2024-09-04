@@ -1,13 +1,14 @@
-// Usa Lexico_ClasePractica
+//Usa Lexico_ClasePractica
 //Solo expresiones sin ()
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "y.tab.h"
+#include "symbol-table.c"
+
 int yystopparser=0;
 FILE *yyin;
-FILE *symbol_file;
 
 int yyerror();
 int yylex();
@@ -90,10 +91,17 @@ declaracion:
 	  ;   
 
 conj_var:
-         conj_var COMA ID {  fprintf(symbol_file, "%s\n", yytext);
-            printf(", ");}
-         | ID {  printf(", "); fprintf(symbol_file, "%s\n", yytext);}
-         ;
+      conj_var COMA ID {
+            Simbolo simbolo = {"", "", "", 0};
+            strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
+            write_symbol_table(simbolo);
+            printf(", ");
+      }
+      | ID {
+            Simbolo simbolo = {"", "", "", 0};
+            strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
+            write_symbol_table(simbolo);
+      } ;
          
 tipo_var: 
        DECL_STRING {printf(": variable/s de tipo String.\n");}
@@ -106,9 +114,24 @@ asignacion_variables:
       ID OP_AS constante_variable ;
 
 constante_variable:
-      CONST_INT {fprintf(symbol_file, "%s\n", yytext);}
-      | CONST_FLOAT {fprintf(symbol_file, "%s\n", yytext);}
-      | CONST_STRING {fprintf(symbol_file, "%s\n", yytext);}
+      CONST_INT {
+            Simbolo simbolo = {"", "", "", sizeof(int)};
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
+            strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
+            write_symbol_table(simbolo);
+      }
+      | CONST_FLOAT {
+            Simbolo simbolo = {"", "", "", sizeof(float)};
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
+            strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
+            write_symbol_table(simbolo);
+      }
+      | CONST_STRING {
+            Simbolo simbolo = {"", "", "", strlen(yytext)};
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
+            strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
+            write_symbol_table(simbolo);
+      }
       ;
 
 while_sentence:
@@ -147,39 +170,23 @@ variable_aritmetica:
 
 %%
 
-void abrir_archivo() {
-    symbol_file = fopen("symbol-table.txt", "w");
-    if (!symbol_file) {
-        fprintf(stderr, "Error al abrir el archivo simbolos.txt\n");
-        exit(1);
-    }
-}
-
-void cerrar_archivo() {
-    if (symbol_file) {
-        fclose(symbol_file);
-    }
-}
-
 int main(int argc, char *argv[])
 {
-    if((yyin = fopen(argv[1], "rt"))==NULL)
-    {
-        printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
-       
-    }
-    else
-    { 
-        abrir_archivo();
-        yyparse();
-        cerrar_archivo();
-    }
+      if((yyin = fopen(argv[1], "rt")) == NULL)
+      {
+            printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
+            return 1;
+      }
+      open_symbol_table_file();
+      yyparse();
+      close_symbol_table_file();
 	fclose(yyin);
-        return 0;
+
+      return 0;
 }
 
 int yyerror(void)
-     {
-       printf("Error Sintactico\n");
-	 exit (1);
-     }
+{
+      printf("Error Sintactico\n");
+      exit (1);
+}
