@@ -10,6 +10,12 @@ x := 14
 y := 10
 z := 2
 
+*- ejemplo de error- sintactico de asignacion
+
+x*= 15;
+
+-*
+
 strPrueba := "Test1"
 strPrueba2 := "Test2"
 

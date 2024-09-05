@@ -76,7 +76,7 @@ FUNCT_GPP           "getPenultimatePosition"
 "sino"              {printf("\nExtension IF ELSE...\n"); return START_ELSE;}
 "leer"              {return START_LECTURA;}
 "escribir"          {return START_ESCRITURA;}
-"NOT"               {printf(" <NO> "); return COND_OP_NOT;}
+"NOT"               {printf(" <NOT> "); return COND_OP_NOT;}
 "AND"               {printf(" <Y> "); return COND_OP_AND;}
 "OR"                 {printf(" <O> "); return COND_OP_OR;}
 "binaryCount"        {return FUNCT_BC;}
