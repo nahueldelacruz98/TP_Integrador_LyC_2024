@@ -79,6 +79,8 @@ codigo:
           while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n"); } |
           if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n"); }|
           KC START_ELSE KA |
+          get_penultimate_position |
+          binary_count |
           escritura_sentence |
           lectura_sentence
           ;
@@ -115,6 +117,9 @@ tipo_var:
 
 asignacion_variables:
       ID OP_AS constante_variable {printf("ID se le asigna constante: %s",yytext);};
+      | ID OP_AS get_penultimate_position
+      | ID OP_AS binary_count
+      ;
 
 constante_variable:
       CONST_INT {
@@ -193,6 +198,23 @@ lectura_sentence:
 escritura_sentence:
       START_ESCRITURA PA CONST_STRING PC  {printf("Comienzo de escritura de constante STRING.\n");}
       | START_ESCRITURA PA ID PC {printf("Comienzo de escritura de valor de ID.\n");}
+      ;
+
+vector_numerico:
+      CORCH_A lista_aritmetica CORCH_C {printf("\nVector numerico\n");}
+      ;
+
+lista_aritmetica:
+      variable_aritmetica 
+      | lista_aritmetica COMA variable_aritmetica
+      ;
+
+get_penultimate_position:
+      FUNCT_GPP PA vector_numerico PC {printf("\nEjecutando get_penultimate_position%s\n");}
+      ;
+
+binary_count:
+      FUNCT_BC PA vector_numerico PC {printf("\nEjecutando binary_count \n");}
       ;
 
 
