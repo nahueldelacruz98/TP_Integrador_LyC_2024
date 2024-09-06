@@ -80,6 +80,8 @@ codigo:
           if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n"); }|
           KC START_ELSE KA {printf("\nEn caso de que no se cumpla la condicion de IF, realizara el siguiente codigo:\n\n");} |
           COMENTARIO { printf("Comentario: %s\n\n",yytext); } |
+          get_penultimate_position |
+          binary_count |
           escritura_sentence |
           lectura_sentence
           ;
@@ -114,7 +116,10 @@ tipo_var:
 
 
 asignacion_variables:
-      ID OP_AS constante_variable ;
+      ID OP_AS constante_variable 
+      | ID OP_AS get_penultimate_position
+      | ID OP_AS binary_count
+      ;
 
 constante_variable:
       CONST_INT {
@@ -198,9 +203,22 @@ escritura_sentence:
       | START_ESCRITURA PA ID PC {printf("    Escrita\n");}
       ;
 
-binary_count:
+vector_numerico:
+      CORCH_A lista_aritmetica CORCH_C {printf("\nVector numerico\n");}
+      ;
+
+lista_aritmetica:
+      variable_aritmetica 
+      | lista_aritmetica COMA variable_aritmetica
+      ;
 
 get_penultimate_position:
+      FUNCT_GPP PA vector_numerico PC {printf("\nEjecutando get_penultimate_position%s\n");}
+      ;
+
+binary_count:
+      FUNCT_BC PA vector_numerico PC {printf("\nEjecutando binary_count \n");}
+      ;
 
 
 %%

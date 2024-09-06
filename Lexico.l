@@ -100,6 +100,8 @@ FUNCT_GPP           "getPenultimatePosition"
 {PC}			{return PC;}
 {KA}            {return KA;}
 {KC}            {return KC;}
+{CORCH_A}       {return CORCH_A;}
+{CORCH_C}       {return CORCH_C;}
 {COMA}          {return COMA;}
 {DOS_PUNTOS}    {return DOS_PUNTOS;}
 
