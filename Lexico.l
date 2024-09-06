@@ -17,7 +17,7 @@ int yyerror(void);
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
 
-ID			    {LETRA}({LETRA}|{DIGITO})*{0,39}
+ID			    {LETRA}({LETRA}|{DIGITO})*
 OP_AS   		":="
 OP_ARIT         "=:"
 OP_SUM		    "+"
