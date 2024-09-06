@@ -78,7 +78,7 @@ codigo:
           sentencia_aritmetica |
           while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n"); } |
           if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n"); }|
-          KC START_ELSE KA |
+          KC START_ELSE KA {printf("\nInicio sentencia IF ELSE.\n\n"); }|
           get_penultimate_position |
           binary_count |
           escritura_sentence |
@@ -147,10 +147,10 @@ constante_variable:
       ;
 
 while_sentence:
-      START_WHILE PA condicion_multiple PC {printf(" entonces hace el siguiente codigo:\n\n"); };
+      START_WHILE PA condicion_multiple PC {printf(" .Sentencia WHILE hace el siguiente codigo:\n\n"); };
 
 if_sentence:
-      START_IF PA condicion_multiple PC {printf(" entonces hace el siguiente codigo:\n\n"); };
+      START_IF PA condicion_multiple PC {printf(" .Sentencia IF hace el siguiente codigo:\n\n"); };
 
 condicion_multiple:
       valores_admitidos_condicion comparador valores_admitidos_condicion
@@ -210,7 +210,7 @@ lista_aritmetica:
       ;
 
 get_penultimate_position:
-      FUNCT_GPP PA vector_numerico PC {printf("\nEjecutando get_penultimate_position%s\n");}
+      FUNCT_GPP PA vector_numerico PC {printf("\nEjecutando get_penultimate_position\n");}
       ;
 
 binary_count:
