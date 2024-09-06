@@ -3,18 +3,18 @@
 #define MAX_LENGTH 40
 #define NAME_SYMBOL_TABLE_FILE "symbol-table.txt"
 
-FILE *symbol_file;
-
-int write_symbol_table(Simbolo);
-int open_symbol_table_file();
-int close_symbol_table_file();
-
 typedef struct {
     char nombre[MAX_LENGTH];
     char tipoDato[MAX_LENGTH];
     char valor[MAX_LENGTH];
     int longitud;
 } Simbolo;
+
+FILE *symbol_file;
+
+int write_symbol_table(Simbolo);
+int open_symbol_table_file();
+int close_symbol_table_file();
 
 int open_symbol_table_file() {
     symbol_file = fopen(NAME_SYMBOL_TABLE_FILE, "wt");
