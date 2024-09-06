@@ -74,8 +74,8 @@ FUNCT_GPP           "getPenultimatePosition"
 "mientras"          {printf("\nComienzo del ciclo WHILE. Mientras "); return START_WHILE;}
 "si"                {printf("\nComienzo de sentencia IF. Si "); return START_IF;}
 "sino"              {printf("\nExtension IF ELSE...\n"); return START_ELSE;}
-"leer"              {return START_LECTURA;}
-"escribir"          {return START_ESCRITURA;}
+"leer"              {printf("\nEmpezando lectura\n"); return START_LECTURA;}
+"escribir"          {printf("\nEmpezando escritura\n"); return START_ESCRITURA;}
 "NOT"               {printf(" <NOT> "); return COND_OP_NOT;}
 "AND"               {printf(" <Y> "); return COND_OP_AND;}
 "OR"                 {printf(" <O> "); return COND_OP_OR;}

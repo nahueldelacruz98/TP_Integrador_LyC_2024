@@ -79,7 +79,10 @@ codigo:
           while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n"); } |
           if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n"); }|
           KC START_ELSE KA {printf("\nEn caso de que no se cumpla la condicion de IF, realizara el siguiente codigo:\n\n");} |
-          COMENTARIO { printf("Comentario: %s\n\n",yytext); };
+          COMENTARIO { printf("Comentario: %s\n\n",yytext); } |
+          escritura_sentence |
+          lectura_sentence
+          ;
 
 variables:  	   
           INIT_VAR KA declaracion KC {printf("FIN de declaracion de variables.\n\n");}
@@ -181,10 +184,20 @@ factor:
       | variable_aritmetica {printf("    CTE es Factor\n");}
 	| PA expresion PC {printf("    Expresion entre parentesis es Factor\n");}
      	;
- 
 
 variable_aritmetica:
       ID | CONST_FLOAT | CONST_INT ;
+
+lectura_sentence:
+      START_LECTURA PA CONST_STRING PC {printf("    Leida\n");}
+      | START_LECTURA PA ID PC {printf("    Leida\n");}
+      ;
+
+escritura_sentence:
+      START_ESCRITURA PA CONST_STRING PC  {printf("    Escrita\n");}
+      | START_ESCRITURA PA ID PC {printf("    Escrita\n");}
+      ;
+
 
 %%
 
