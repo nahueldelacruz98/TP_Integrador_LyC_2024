@@ -1,0 +1,4 @@
+x = 3 // asignaciones a fines de entender los ejemplos
+y = binaryCount([110,1,0,5,x,10101100,-1])  // y = 4
+
+x = getPenultimatePosition([3, 8.2, 2, 55.5]) // x = 2

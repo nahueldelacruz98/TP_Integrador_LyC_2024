@@ -198,6 +198,10 @@ escritura_sentence:
       | START_ESCRITURA PA ID PC {printf("    Escrita\n");}
       ;
 
+binary_count:
+
+get_penultimate_position:
+
 
 %%
 
