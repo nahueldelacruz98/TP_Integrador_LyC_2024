@@ -78,8 +78,7 @@ codigo:
           sentencia_aritmetica |
           while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n"); } |
           if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n"); }|
-          KC START_ELSE KA {printf("\nEn caso de que no se cumpla la condicion de IF, realizara el siguiente codigo:\n\n");} |
-          COMENTARIO { printf("Comentario: %s\n\n",yytext); } |
+          KC START_ELSE KA |
           escritura_sentence |
           lectura_sentence
           ;
@@ -98,12 +97,13 @@ conj_var:
             Simbolo simbolo = {"", "", "---", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
-            printf(", ");
+            printf(",%s",yytext);
       }
       | ID {
             Simbolo simbolo = {"", "", "---", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
+            printf("%s",yytext);
       } ;
          
 tipo_var: 
@@ -114,7 +114,7 @@ tipo_var:
 
 
 asignacion_variables:
-      ID OP_AS constante_variable ;
+      ID OP_AS constante_variable {printf("ID se le asigna constante: %s",yytext);};
 
 constante_variable:
       CONST_INT {
@@ -148,20 +148,18 @@ if_sentence:
       START_IF PA condicion_multiple PC {printf(" entonces hace el siguiente codigo:\n\n"); };
 
 condicion_multiple:
-      condicion
-      | COND_OP_NOT condicion
+      valores_admitidos_condicion comparador valores_admitidos_condicion
+      | COND_OP_NOT valores_admitidos_condicion comparador valores_admitidos_condicion
       | condicion_multiple COND_OP_AND condicion_multiple
       | condicion_multiple COND_OP_OR condicion_multiple
       ;
 
-condicion:
-      constante_variable comparador constante_variable
-      | constante_variable comparador ID
-      | ID comparador constante_variable
-      | ID comparador ID ;
-
 comparador:
-      COMP_MAY | COMP_MEN | COMP_EQ | COMP_MAY_EQ | COMP_MEN_EQ | COMP_DIST ;
+      COMP_MAY {printf(" es mayor a ");} | COMP_MEN {printf(" es menor a ");}| COMP_EQ {printf(" es igual a ");} | COMP_MAY_EQ {printf(" es mayor o igual a ");} | COMP_MEN_EQ {printf(" es menor o igual a ");} | COMP_DIST {printf(" es distinto a ");};
+
+valores_admitidos_condicion:
+      ID {printf("ID");}
+      | constante_variable {printf("CONSTANTE");}
 
 sentencia_aritmetica:
       ID OP_ARIT expresion 
@@ -189,13 +187,12 @@ variable_aritmetica:
       ID | CONST_FLOAT | CONST_INT ;
 
 lectura_sentence:
-      START_LECTURA PA CONST_STRING PC {printf("    Leida\n");}
-      | START_LECTURA PA ID PC {printf("    Leida\n");}
+      START_LECTURA PA ID PC {printf("Comienzo de lectura. Guardar resultado en ID.\n");}
       ;
 
 escritura_sentence:
-      START_ESCRITURA PA CONST_STRING PC  {printf("    Escrita\n");}
-      | START_ESCRITURA PA ID PC {printf("    Escrita\n");}
+      START_ESCRITURA PA CONST_STRING PC  {printf("Comienzo de escritura de constante STRING.\n");}
+      | START_ESCRITURA PA ID PC {printf("Comienzo de escritura de valor de ID.\n");}
       ;
 
 

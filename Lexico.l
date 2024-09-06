@@ -17,7 +17,7 @@ int yyerror(void);
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
 
-ID			    {LETRA}({LETRA}|{DIGITO})*
+ID			    {LETRA}({LETRA}|{DIGITO})*{0,39}
 OP_AS   		":="
 OP_ARIT         "=:"
 OP_SUM		    "+"
@@ -33,7 +33,7 @@ CORCH_C         "]"
 DOS_PUNTOS      ":"
 COMA            ","
 COMILLA         \"
-COMENTARIO  	"*-"([^*]*|\*[^-])*?"-*"
+
 
 COMP_MAY        ">"
 COMP_MEN        "<"
@@ -71,31 +71,31 @@ FUNCT_GPP           "getPenultimatePosition"
 "String"            {return DECL_STRING;}
 "Float"             {return DECL_FLOAT;}
 "Int"               {return DECL_INT;}
-"mientras"          {printf("\nComienzo del ciclo WHILE. Mientras "); return START_WHILE;}
-"si"                {printf("\nComienzo de sentencia IF. Si "); return START_IF;}
+"mientras"          {printf("\nSentencia WHILE. Mientras "); return START_WHILE;}
+"si"                {printf("\nSentencia IF. Si "); return START_IF;}
 "sino"              {printf("\nExtension IF ELSE...\n"); return START_ELSE;}
-"leer"              {printf("\nEmpieza lectura\n");return START_LECTURA;}
-"escribir"          {printf("\nEmpieza escritura\n");return START_ESCRITURA;}
+"leer"              {return START_LECTURA;}
+"escribir"          {return START_ESCRITURA;}
 "NOT"               {printf(" <NOT> "); return COND_OP_NOT;}
 "AND"               {printf(" <Y> "); return COND_OP_AND;}
 "OR"                 {printf(" <O> "); return COND_OP_OR;}
 "binaryCount"        {return FUNCT_BC;}
 "getPenultimatePosition"    {return FUNCT_GPP;}
 
-{CONST_FLOAT}       {printf("constante FLOAT %s",yytext); return CONST_FLOAT;}
-{CONST_STRING}      {printf("constante STRING %s",yytext); return CONST_STRING;}
-{CONST_INT}         {printf("constante INT %s",yytext); return CONST_INT;}
+"*-"([^*]*|\*[^-])*?"-*"    {printf("\nComentario: %s\n",yytext);}
 
-{ID}                {printf("Variable '%s'",yytext); return ID; }
+{CONST_FLOAT}       {return CONST_FLOAT;}
+{CONST_STRING}      {return CONST_STRING;}
+{CONST_INT}         {return CONST_INT;}
 
-{COMENTARIO}    {return COMENTARIO;}
+{ID}                {return ID; }
 
-{OP_SUM}		{printf(" suma ");return OP_SUM;}
-{OP_AS}			{printf(" se le asigna el valor: "); return OP_AS;}
-{OP_MUL}		{printf(" multiplica ");return OP_MUL;}
-{OP_RES}		{printf(" resta ");return OP_RES;}
-{OP_DIV}		{printf(" divide ");return OP_DIV;}
-{OP_ARIT}       {printf(". Inicio operacion aritmetica. "); return OP_ARIT;}
+{OP_SUM}		{return OP_SUM;}
+{OP_AS}			{return OP_AS;}
+{OP_MUL}		{return OP_MUL;}
+{OP_RES}		{return OP_RES;}
+{OP_DIV}		{return OP_DIV;}
+{OP_ARIT}       {return OP_ARIT;}
 {PA}			{return PA;}
 {PC}			{return PC;}
 {KA}            {return KA;}
@@ -103,12 +103,12 @@ FUNCT_GPP           "getPenultimatePosition"
 {COMA}          {return COMA;}
 {DOS_PUNTOS}    {return DOS_PUNTOS;}
 
-{COMP_MAY}          { printf(" es mayor a "); return COMP_MAY;}
-{COMP_MEN}          { printf(" es menor a "); return COMP_MEN;}
-{COMP_MEN_EQ}       { printf(" es menor o igual a "); return COMP_MEN_EQ;}
-{COMP_MAY_EQ}       { printf(" es mayor o igual a "); return COMP_MAY_EQ;}
-{COMP_EQ}           { printf(" es igual a "); return COMP_EQ;}
-{COMP_DIST}         { printf(" es distinto a "); return COMP_DIST;}
+{COMP_MAY}          { return COMP_MAY;}
+{COMP_MEN}          { return COMP_MEN;}
+{COMP_MEN_EQ}       { return COMP_MEN_EQ;}
+{COMP_MAY_EQ}       { return COMP_MAY_EQ;}
+{COMP_EQ}           { return COMP_EQ;}
+{COMP_DIST}         { return COMP_DIST;}
 
 "\n"      		
 "\t"
