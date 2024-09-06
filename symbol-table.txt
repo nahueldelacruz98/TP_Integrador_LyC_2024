@@ -25,7 +25,7 @@ _-9.000001,,-9.00,4
 _-99999.99,,-99999.99,4
 _-99.,,-99.00,4
 _-.9999,,-1.00,4
-_@sdADaSjfla%dfg$&/8()afadfbtyhfgqadfgh,,@sdADaSjfla%dfg$&/8()afadfbtyhfgqadfghj,40
+_@sdADaSjfla%dfg$&/8(),,@sdADaSjfla%dfg$&/8(),21
 _       asldk  fh sjf ,,       asldk  fh sjf ,21
 _1,,1,1
 _ ,, ,1
