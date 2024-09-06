@@ -4,7 +4,7 @@ bison -dyv Sintactico.y
 
 gcc.exe lex.yy.c y.tab.c -o compilador.exe
 
-compilador.exe prueba-lec-esc.txt
+compilador.exe prueba.txt
 
 @echo off
 del compilador.exe

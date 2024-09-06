@@ -33,7 +33,7 @@ CORCH_C         "]"
 DOS_PUNTOS      ":"
 COMA            ","
 COMILLA         \"
-COMENTARIO  	"*-"[^\"]*"-*"
+COMENTARIO  	"*-"([^*]*|\*[^-])*?"-*"
 
 COMP_MAY        ">"
 COMP_MEN        "<"
