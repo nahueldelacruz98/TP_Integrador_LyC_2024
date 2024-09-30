@@ -79,10 +79,9 @@ FUNCT_GPP           "getPenultimatePosition"
 "NOT"               {printf(" <NOT> "); return COND_OP_NOT;}
 "AND"               {printf(" <Y> "); return COND_OP_AND;}
 "OR"                {printf(" <O> "); return COND_OP_OR;}
-"binaryCount"       {return FUNCT_BC;}
-"getPenultimatePosition"    {return FUNCT_GPP;}
 
-"*-"([^*]*|\*[^-])*?"-*"
+"binaryCount"               {return FUNCT_BC;}
+"getPenultimatePosition"    {return FUNCT_GPP;}
 
 {CONST_INT}         {verificar_longitud(yytext, MAX_LENGTH_INT); return CONST_INT;}
 {CONST_FLOAT}       {verificar_longitud(yytext, MAX_LENGTH_FLOAT); return CONST_FLOAT;}
@@ -105,12 +104,14 @@ FUNCT_GPP           "getPenultimatePosition"
 {COMA}          {return COMA;}
 {DOS_PUNTOS}    {return DOS_PUNTOS;}
 
-{COMP_MAY}          { return COMP_MAY;}
-{COMP_MEN}          { return COMP_MEN;}
-{COMP_MEN_EQ}       { return COMP_MEN_EQ;}
-{COMP_MAY_EQ}       { return COMP_MAY_EQ;}
-{COMP_EQ}           { return COMP_EQ;}
-{COMP_DIST}         { return COMP_DIST;}
+{COMP_MAY}      {return COMP_MAY;}
+{COMP_MEN}      {return COMP_MEN;}
+{COMP_MEN_EQ}   {return COMP_MEN_EQ;}
+{COMP_MAY_EQ}   {return COMP_MAY_EQ;}
+{COMP_EQ}       {return COMP_EQ;}
+{COMP_DIST}     {return COMP_DIST;}
+
+"*-"([^*]*|\*[^-])*?"-*"
 
 "\n"
 "\t"
@@ -118,6 +119,6 @@ FUNCT_GPP           "getPenultimatePosition"
 " "
 "\r\n"
 
-.			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
+.		        {printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
 
 %%

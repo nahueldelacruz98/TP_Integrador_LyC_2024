@@ -15,7 +15,6 @@ int yylex();
 
 extern char* yytext;
 
-
 %}
 
 %token CONST_INT
@@ -124,13 +123,13 @@ asignacion_variables:
 
 constante_variable:
       CONST_INT {
-            Simbolo simbolo = {"", "", "", 0};
+            Simbolo simbolo = {"", "CTE_INTEGER", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
       }
       | CONST_FLOAT {
-            Simbolo simbolo = {"", "", "", 0};
+            Simbolo simbolo = {"", "CTE_FLOAT", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));
@@ -138,7 +137,7 @@ constante_variable:
       }
       | CONST_STRING {
             int len = ((int) strlen(yytext)) - 2;
-            Simbolo simbolo = {"", "", "", len};
+            Simbolo simbolo = {"", "CTE_STRING", "", len};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.nombre, MAX_LENGTH, "_%.*s", len, yytext + 1);
