@@ -71,9 +71,9 @@ FUNCT_GPP           "getPenultimatePosition"
 "String"            {return DECL_STRING;}
 "Float"             {return DECL_FLOAT;}
 "Int"               {return DECL_INT;}
-"mientras"          {printf("\nSentencia WHILE. Mientras "); return START_WHILE;}
-"si"                {printf("\nSentencia IF. Si "); return START_IF;}
-"sino"              {printf("\nExtension IF ELSE...\n"); return START_ELSE;}
+"mientras"          {return START_WHILE;}
+"si"                {return START_IF;}
+"sino"              {return START_ELSE;}
 "leer"              {return START_LECTURA;}
 "escribir"          {return START_ESCRITURA;}
 "NOT"               {printf(" <NOT> "); return COND_OP_NOT;}
@@ -82,7 +82,7 @@ FUNCT_GPP           "getPenultimatePosition"
 "binaryCount"        {return FUNCT_BC;}
 "getPenultimatePosition"    {return FUNCT_GPP;}
 
-"*-"([^*]*|\*[^-])*?"-*"    {printf("\nComentario: %s\n",yytext);}
+"*-"([^*]*|\*[^-])*?"-*"    
 
 {CONST_FLOAT}       {return CONST_FLOAT;}
 {CONST_STRING}      {return CONST_STRING;}
