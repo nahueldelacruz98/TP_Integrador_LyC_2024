@@ -63,13 +63,11 @@ int write_symbol_table(Simbolo simbolo) {
         return 1;
     }
 
-    // Escribir el símbolo si no existe
     fprintf(symbol_file, "%s,%s,%s,", simbolo.nombre, simbolo.tipoDato, simbolo.valor);
     if (simbolo.longitud != 0)
         fprintf(symbol_file, "%d", simbolo.longitud);
     fprintf(symbol_file, "\n");
 
-    // Cierra el archivo después de escribir
     fclose(symbol_file);
 
     return 0;
