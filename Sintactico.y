@@ -96,13 +96,13 @@ declaracion:
 
 conj_var:
       conj_var COMA ID {
-            Simbolo simbolo = {"", "", "---", 0};
+            Simbolo simbolo = {"", "", "-", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
             printf(",%s",yytext);
       }
       | ID {
-            Simbolo simbolo = {"", "", "---", 0};
+            Simbolo simbolo = {"", "", "-", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
             printf("%s",yytext);
