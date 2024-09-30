@@ -227,9 +227,9 @@ int main(int argc, char *argv[])
             printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
             return 1;
       }
-      open_symbol_table_file();
+      open_symbol_table();
       yyparse();
-      close_symbol_table_file();
+      close_symbol_table();
 	fclose(yyin);
 
       return 0;
