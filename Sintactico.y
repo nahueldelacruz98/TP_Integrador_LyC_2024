@@ -68,31 +68,31 @@ extern char* yytext;
 %%
 
 linea_codigo:
-          codigo 
-          | linea_codigo codigo
-          ;
+      codigo 
+      | linea_codigo codigo
+      ;
 
 codigo:
-          variables | 
-          asignacion_variables {printf("\n"); } | 
-          sentencia_aritmetica |
-          while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n"); } |
-          if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n"); }|
-          KC START_ELSE KA {printf("\nInicio sentencia IF ELSE.\n\n"); }|
-          get_penultimate_position |
-          binary_count |
-          escritura_sentence |
-          lectura_sentence
-          ;
+      variables
+      | asignacion_variables {printf("\n");}
+      | sentencia_aritmetica
+      | while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n");} 
+      | if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n");}
+      | KC START_ELSE KA {printf("\nInicio sentencia IF ELSE.\n\n");}
+      | get_penultimate_position
+      | binary_count
+      | escritura_sentence
+      | lectura_sentence
+      ;
 
 variables:  	   
-          INIT_VAR KA declaracion KC {printf("FIN de declaracion de variables.\n\n");}
-          ;
+      INIT_VAR KA declaracion KC {printf("FIN de declaracion de variables.\n\n");}
+      ;
 
 declaracion: 
-          conj_var DOS_PUNTOS tipo_var 
-          | declaracion conj_var DOS_PUNTOS tipo_var
-	  ;   
+      conj_var DOS_PUNTOS tipo_var 
+      | declaracion conj_var DOS_PUNTOS tipo_var
+	;   
 
 conj_var:
       conj_var COMA ID {
@@ -109,10 +109,10 @@ conj_var:
       } ;
          
 tipo_var: 
-       DECL_STRING {printf(": variable/s de tipo String.\n");}
-       | DECL_FLOAT {printf(": variable/s de tipo Float.\n");}
-       | DECL_INT {printf(": variable/s de tipo Integer.\n");} 
-       ;
+      DECL_STRING {printf(": variable/s de tipo String.\n");}
+      | DECL_FLOAT {printf(": variable/s de tipo Float.\n");}
+      | DECL_INT {printf(": variable/s de tipo Integer.\n");} 
+      ;
 
 
 asignacion_variables:
@@ -147,10 +147,12 @@ constante_variable:
       ;
 
 while_sentence:
-      START_WHILE PA condicion_multiple PC {printf(" .Sentencia WHILE hace el siguiente codigo:\n\n"); };
+      START_WHILE PA condicion_multiple PC {printf(" .Sentencia WHILE hace el siguiente codigo:\n\n");}
+      ;
 
 if_sentence:
-      START_IF PA condicion_multiple PC {printf(" .Sentencia IF hace el siguiente codigo:\n\n"); };
+      START_IF PA condicion_multiple PC {printf(" .Sentencia IF hace el siguiente codigo:\n\n");}
+      ;
 
 condicion_multiple:
       valores_admitidos_condicion comparador valores_admitidos_condicion
@@ -160,7 +162,13 @@ condicion_multiple:
       ;
 
 comparador:
-      COMP_MAY {printf(" es mayor a ");} | COMP_MEN {printf(" es menor a ");}| COMP_EQ {printf(" es igual a ");} | COMP_MAY_EQ {printf(" es mayor o igual a ");} | COMP_MEN_EQ {printf(" es menor o igual a ");} | COMP_DIST {printf(" es distinto a ");};
+      COMP_MAY {printf(" es mayor a ");}
+      | COMP_MEN {printf(" es menor a ");}
+      | COMP_EQ {printf(" es igual a ");}
+      | COMP_MAY_EQ {printf(" es mayor o igual a ");}
+      | COMP_MEN_EQ {printf(" es menor o igual a ");}
+      | COMP_DIST {printf(" es distinto a ");}
+      ;
 
 valores_admitidos_condicion:
       ID {printf("ID");}
@@ -171,16 +179,16 @@ sentencia_aritmetica:
 	;
  
 expresion:
-         termino {printf("    Termino es Expresion\n");}
-	 |expresion OP_SUM termino {printf("    Expresion+Termino es Expresion\n");}
-	 |expresion OP_RES termino {printf("    Expresion-Termino es Expresion\n");}
-	 ;
+      termino {printf("    Termino es Expresion\n");}
+	| expresion OP_SUM termino {printf("    Expresion+Termino es Expresion\n");}
+	| expresion OP_RES termino {printf("    Expresion-Termino es Expresion\n");}
+	;
  
 termino: 
-       factor {printf("    Factor es Termino\n");}
-       |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
-       |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
-       ;
+      factor {printf("    Factor es Termino\n");}
+      | termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
+      | termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
+      ;
  
 factor: 
       ID {printf("    ID es Factor \n");}
@@ -189,7 +197,10 @@ factor:
      	;
 
 variable_aritmetica:
-      ID | CONST_FLOAT | CONST_INT ;
+      ID 
+      | CONST_FLOAT 
+      | CONST_INT 
+      ;
 
 lectura_sentence:
       START_LECTURA PA ID PC {printf("Comienzo de lectura. Guardar resultado en ID.\n");}
@@ -216,7 +227,6 @@ get_penultimate_position:
 binary_count:
       FUNCT_BC PA vector_numerico PC {printf("\nEjecutando binary_count \n");}
       ;
-
 
 %%
 
