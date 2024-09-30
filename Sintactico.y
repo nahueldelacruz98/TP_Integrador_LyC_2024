@@ -127,13 +127,15 @@ asignacion_variables:
 
 constante_variable:
       CONST_INT {
-            Simbolo simbolo = {"", "", "", sizeof(int)};
+            verificar_longitud(yytext, MAX_LENGTH_INT);
+            Simbolo simbolo = {"", "", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
       }
       | CONST_FLOAT {
-            Simbolo simbolo = {"", "", "", sizeof(float)};
+            verificar_longitud(yytext, MAX_LENGTH_FLOAT);
+            Simbolo simbolo = {"", "", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));

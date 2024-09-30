@@ -1,5 +1,7 @@
 #define MAX_LENGTH_ID 30
 #define MAX_LENGTH_STRING 40
+#define MAX_LENGTH_INT 16
+#define MAX_LENGTH_FLOAT 32
 
 void verificar_longitud(const char *, int);
 

@@ -37,7 +37,10 @@ int close_symbol_table_file() {
 
 int write_symbol_table(Simbolo simbolo) 
 {
-    fprintf(symbol_file, "%s,%s,%s,%d\n", simbolo.nombre, simbolo.tipoDato, simbolo.valor, simbolo.longitud);
+    fprintf(symbol_file, "%s,%s,%s,", simbolo.nombre, simbolo.tipoDato, simbolo.valor);
+    if(simbolo.longitud != 0)
+        fprintf(symbol_file, "%d", simbolo.longitud);
+    fprintf(symbol_file, "\n");
 
     return 0;
 }
