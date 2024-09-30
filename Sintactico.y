@@ -6,7 +6,6 @@
 #include <string.h>
 #include "y.tab.h"
 #include "symbol-table.c"
-#include "utils.c"
 
 int yystopparser=0;
 FILE *yyin;
@@ -98,14 +97,12 @@ declaracion:
 
 conj_var:
       conj_var COMA ID {
-            verificar_longitud(yytext, MAX_LENGTH_ID);
             Simbolo simbolo = {"", "", "---", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
             printf(",%s",yytext);
       }
       | ID {
-            verificar_longitud(yytext, MAX_LENGTH_ID);
             Simbolo simbolo = {"", "", "---", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
@@ -127,14 +124,12 @@ asignacion_variables:
 
 constante_variable:
       CONST_INT {
-            verificar_longitud(yytext, MAX_LENGTH_INT);
             Simbolo simbolo = {"", "", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
       }
       | CONST_FLOAT {
-            verificar_longitud(yytext, MAX_LENGTH_FLOAT);
             Simbolo simbolo = {"", "", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
@@ -142,7 +137,6 @@ constante_variable:
             write_symbol_table(simbolo);
       }
       | CONST_STRING {
-            verificar_longitud(yytext, MAX_LENGTH_STRING);
             int len = ((int) strlen(yytext)) - 2;
             Simbolo simbolo = {"", "", "", len};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);

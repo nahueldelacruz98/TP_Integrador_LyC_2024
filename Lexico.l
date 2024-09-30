@@ -1,8 +1,9 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "y.tab.h"
+#include "utils.c"
+
 FILE  *yyin;
 int yylval;
 char *yyltext;
@@ -11,8 +12,8 @@ int yyerror(void);
 
 %}
 
-%option noyywrap  
-%option yylineno 
+%option noyywrap
+%option yylineno
 
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
@@ -33,7 +34,6 @@ CORCH_C         "]"
 DOS_PUNTOS      ":"
 COMA            ","
 COMILLA         \"
-
 
 COMP_MAY        ">"
 COMP_MEN        "<"
@@ -78,17 +78,17 @@ FUNCT_GPP           "getPenultimatePosition"
 "escribir"          {return START_ESCRITURA;}
 "NOT"               {printf(" <NOT> "); return COND_OP_NOT;}
 "AND"               {printf(" <Y> "); return COND_OP_AND;}
-"OR"                 {printf(" <O> "); return COND_OP_OR;}
-"binaryCount"        {return FUNCT_BC;}
+"OR"                {printf(" <O> "); return COND_OP_OR;}
+"binaryCount"       {return FUNCT_BC;}
 "getPenultimatePosition"    {return FUNCT_GPP;}
 
-"*-"([^*]*|\*[^-])*?"-*"    
+"*-"([^*]*|\*[^-])*?"-*"
 
-{CONST_FLOAT}       {return CONST_FLOAT;}
-{CONST_STRING}      {return CONST_STRING;}
-{CONST_INT}         {return CONST_INT;}
+{CONST_INT}         {verificar_longitud(yytext, MAX_LENGTH_INT); return CONST_INT;}
+{CONST_FLOAT}       {verificar_longitud(yytext, MAX_LENGTH_FLOAT); return CONST_FLOAT;}
+{CONST_STRING}      {verificar_longitud(yytext, MAX_LENGTH_STRING); return CONST_STRING;}
 
-{ID}                {return ID; }
+{ID}                {verificar_longitud(yytext, MAX_LENGTH_ID); return ID;}
 
 {OP_SUM}		{return OP_SUM;}
 {OP_AS}			{return OP_AS;}
@@ -112,11 +112,11 @@ FUNCT_GPP           "getPenultimatePosition"
 {COMP_EQ}           { return COMP_EQ;}
 {COMP_DIST}         { return COMP_DIST;}
 
-"\n"      		
+"\n"
 "\t"
 "\n\t"
-" "             		
-"\r\n"  
+" "
+"\r\n"
 
 .			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
