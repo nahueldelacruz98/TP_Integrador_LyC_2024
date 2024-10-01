@@ -4,8 +4,7 @@
 #include "y.tab.h"
 #include "utils.c"
 
-FILE  *yyin;
-int yylval;
+FILE *yyin;
 char *yyltext;
 
 int yyerror(void);
@@ -83,11 +82,11 @@ FUNCT_GPP           "getPenultimatePosition"
 "binaryCount"               {return FUNCT_BC;}
 "getPenultimatePosition"    {return FUNCT_GPP;}
 
-{CONST_INT}         {verificar_longitud(yytext, MAX_LENGTH_INT); return CONST_INT;}
-{CONST_FLOAT}       {verificar_longitud(yytext, MAX_LENGTH_FLOAT); return CONST_FLOAT;}
-{CONST_STRING}      {verificar_longitud(yytext, MAX_LENGTH_STRING); return CONST_STRING;}
+{CONST_INT}         {verificar_longitud(yytext, MAX_LENGTH_INT); yylval.strval = strdup(yytext); return CONST_INT;}
+{CONST_FLOAT}       {verificar_longitud(yytext, MAX_LENGTH_FLOAT); yylval.strval = strdup(yytext); return CONST_FLOAT;}
+{CONST_STRING}      {verificar_longitud(yytext, MAX_LENGTH_STRING); yylval.strval = strdup(yytext); return CONST_STRING;}
 
-{ID}                {verificar_longitud(yytext, MAX_LENGTH_ID); return ID;}
+{ID}                {verificar_longitud(yytext, MAX_LENGTH_ID); yylval.strval = strdup(yytext); return ID;}
 
 {OP_SUM}		{return OP_SUM;}
 {OP_AS}			{return OP_AS;}

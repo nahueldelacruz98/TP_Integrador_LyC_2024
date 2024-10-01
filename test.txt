@@ -1,9 +1,14 @@
 *- Declaracion de variables -*
 
 init {
+    a1,b1,c1 : Int
+    a2 : String
+}
+
+init {
     a,x,resFloat : Float
     b,y : String
-    c,d : Int
+    c,d,z : Int
 }
 
 *- Asignacion/Inicializacion de variables -*
@@ -40,6 +45,7 @@ y := "2146546534543"
 *- Operaciones Aritméticas -*
 
 resFloat =: a + 1 * (b*c - d) / 1.2
+x =: z * 17.1 + 8
  
 *- Mientras -*
  
