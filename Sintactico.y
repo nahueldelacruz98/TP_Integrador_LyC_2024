@@ -9,6 +9,7 @@
 #include "symbol-table.c"
 #include "intermediate-code.c"
 #include "arbol-sintactico.c"
+#include "stack.c"
 
 int yystopparser=0;
 FILE *yyin;
