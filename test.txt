@@ -42,7 +42,7 @@ y := " "
 y := "2146546534543"
 
 
-*- Operaciones Aritméticas -*
+*- Operaciones Aritmeticas -*
 
 resFloat =: a + 1 * (b*c - d) / 1.2
 x =: z * 17.1 + 8

@@ -110,7 +110,7 @@ FUNCT_GPP           "getPenultimatePosition"
 {COMP_EQ}       {return COMP_EQ;}
 {COMP_DIST}     {return COMP_DIST;}
 
-"*-"([^*]*|\*[^-])*?"-*"
+"*-"[0-9a-zA-Z\n\t \r\:\=\"\+\*\/\(\)\{\}\[\]\,\>\<]((\-)+[0-9a-zA-Z\n\t \r\:\=\"\+\/\(\)\{\}\[\]\,\>\<]|[0-9a-zA-Z\n\t \r\:\=\"\+\*\/\(\)\{\}\[\]\,\>\<])*"-*"
 
 "\n"
 "\t"
