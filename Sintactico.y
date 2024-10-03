@@ -20,6 +20,7 @@ int yylex();
 extern char* yytext;
 
 FILE *prueba_orden;
+Pila *pila;
 
 struct Nodo *asig_var_ptr = NULL;
 struct Nodo *const_var_ptr = NULL;
@@ -32,6 +33,10 @@ struct Nodo *var_ptr = NULL;
 struct Nodo *decl_ptr = NULL;
 struct Nodo *conj_var_ptr = NULL;
 struct Nodo *tipo_var_ptr = NULL;
+struct Nodo *get_pen_pos_ptr = NULL;
+struct Nodo *bin_count_ptr = NULL;
+struct Nodo *vec_num_ptr = NULL;
+struct Nodo *list_arit_ptr = NULL;
 
 %}
 
@@ -112,6 +117,7 @@ variables:
       INIT_VAR KA declaracion KC {
             fprintf(prueba_orden, "<VARIABLES>\n");
             printf("FIN de declaracion de variables.\n\n");
+
             var_ptr = crear_nodo("init", NULL, decl_ptr);
             imprimirInorden(var_ptr);
             write_intermediate_code("\n");
@@ -148,7 +154,8 @@ conj_var:
             printf("%s",yytext);
 
             conj_var_ptr = crear_hoja($1);
-      } ;
+      }
+      ;
          
 tipo_var: 
       DECL_STRING {
@@ -182,8 +189,17 @@ asignacion_variables:
             //imprimirPostorden(asig_var_ptr);
             write_intermediate_code("\n");
       };
-      | ID OP_AS get_penultimate_position
-      | ID OP_AS binary_count
+      | ID OP_AS get_penultimate_position {
+            asig_var_ptr = crear_nodo(":=", crear_hoja($1), get_pen_pos_ptr);
+            imprimirInorden(asig_var_ptr);
+            write_intermediate_code("\n");
+            generarArchivoDOT(asig_var_ptr);
+      }
+      | ID OP_AS binary_count {
+            asig_var_ptr = crear_nodo(":=", crear_hoja($1), bin_count_ptr);
+            imprimirInorden(asig_var_ptr);
+            write_intermediate_code("\n");
+      }
       ;
 
 constante_variable:
@@ -246,34 +262,70 @@ valores_admitidos_condicion:
       | constante_variable {printf("CONSTANTE");}
 
 sentencia_aritmetica:
-      ID OP_ARIT expresion    {     
-                                    sent_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
-                                    imprimirInorden(sent_arit_ptr);
-                                    write_intermediate_code("\n");
-                              }
+      ID OP_ARIT expresion {     
+            sent_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
+            imprimirInorden(sent_arit_ptr);
+            write_intermediate_code("\n");
+      }
 	;
  
 expresion:
-      termino {printf("    Termino es Expresion\n"); expr_ptr = term_ptr;}
-	| expresion OP_SUM termino {printf("    Expresion+Termino es Expresion\n"); expr_ptr = crear_nodo("+", expr_ptr, term_ptr);}
-	| expresion OP_RES termino {printf("    Expresion-Termino es Expresion\n"); expr_ptr = crear_nodo("-", expr_ptr, term_ptr);}
+      termino {
+            printf("    Termino es Expresion\n"); 
+            expr_ptr = term_ptr;
+      }
+	| expresion OP_SUM termino {
+            printf("    Expresion+Termino es Expresion\n"); 
+            expr_ptr = crear_nodo("+", expr_ptr, term_ptr);
+      }
+	| expresion OP_RES termino {
+            printf("    Expresion-Termino es Expresion\n"); 
+            expr_ptr = crear_nodo("-", expr_ptr, term_ptr);
+      }
 	;
  
 termino: 
-      factor {printf("    Factor es Termino\n"); term_ptr = fact_ptr;}
-      | termino OP_MUL factor {printf("     Termino*Factor es Termino\n"); term_ptr = crear_nodo("*", term_ptr, fact_ptr);}
-      | termino OP_DIV factor {printf("     Termino/Factor es Termino\n"); term_ptr = crear_nodo("/", term_ptr, fact_ptr);}
+      factor {
+            printf("    Factor es Termino\n"); 
+            term_ptr = fact_ptr;
+      }
+      | termino OP_MUL factor {
+            printf("     Termino*Factor es Termino\n"); 
+            term_ptr = crear_nodo("*", term_ptr, fact_ptr);
+      }
+      | termino OP_DIV factor {
+            printf("     Termino/Factor es Termino\n"); 
+            term_ptr = crear_nodo("/", term_ptr, fact_ptr);
+      }
       ;
  
 factor: 
-      variable_aritmetica {printf("    %s es Factor\n", yytext); fact_ptr = var_arit_ptr;}
-	| PA expresion PC {printf("    Expresion entre parentesis es Factor\n"); fact_ptr = expr_ptr;}
+      variable_aritmetica {
+            printf("    %s es Factor\n", yytext); 
+            fact_ptr = var_arit_ptr;
+      }
+	| PA expresion PC {
+            printf("    Expresion entre parentesis es Factor\n"); 
+            fact_ptr = expr_ptr;
+      }
      	;
 
 variable_aritmetica:
-      ID {var_arit_ptr = crear_hoja($1);}
-      | CONST_FLOAT {var_arit_ptr = crear_hoja($1);}
-      | CONST_INT {var_arit_ptr = crear_hoja($1);}
+      ID {
+            var_arit_ptr = crear_hoja($1);
+            
+            apilar(pila, $1);
+      }
+      | CONST_FLOAT {
+            var_arit_ptr = crear_hoja($1);
+            
+            apilar(pila, $1);
+      }
+      | CONST_INT {
+            var_arit_ptr = crear_hoja($1);
+            
+            apilar(pila, $1);
+      }
       ;
 
 lectura_sentence:
@@ -286,20 +338,44 @@ escritura_sentence:
       ;
 
 get_penultimate_position:
-      FUNCT_GPP PA vector_numerico PC {printf("\nEjecutando get_penultimate_position\n");}
+      FUNCT_GPP PA vector_numerico PC {
+            void *gpp;
+
+            printf("\nEjecutando get_penultimate_position\n");
+
+            desapilar(pila);
+            gpp = desapilar(pila);
+
+            get_pen_pos_ptr = crear_nodo("get_penultimate_position", crear_hoja(gpp), vec_num_ptr);
+            imprimirInorden(get_pen_pos_ptr);
+            write_intermediate_code("\n");
+      }
       ;
 
 binary_count:
-      FUNCT_BC PA vector_numerico PC {printf("\nEjecutando binary_count \n");}
+      FUNCT_BC PA vector_numerico PC {
+            printf("\nEjecutando binary_count \n");
+
+            bin_count_ptr = crear_nodo("binary_count", NULL, vec_num_ptr);
+            imprimirInorden(bin_count_ptr);
+            write_intermediate_code("\n");
+      }
       ;
 
 vector_numerico:
-      CORCH_A lista_aritmetica CORCH_C {printf("\nVector numerico\n");}
+      CORCH_A lista_aritmetica CORCH_C {
+            printf("\nVector numerico\n");
+            vec_num_ptr = list_arit_ptr;
+      }
       ;
 
 lista_aritmetica:
-      variable_aritmetica 
-      | lista_aritmetica COMA variable_aritmetica
+      variable_aritmetica {
+            list_arit_ptr = var_arit_ptr;
+      }
+      | lista_aritmetica COMA variable_aritmetica {
+            list_arit_ptr = crear_nodo(",", list_arit_ptr, var_arit_ptr);
+      }
       ;
 
 %%
@@ -307,9 +383,9 @@ lista_aritmetica:
 int main(int argc, char *argv[])
 {
       prueba_orden = fopen("prueba_orden.txt", "wt");
+      pila = crear_pila();
 
-      if((yyin = fopen(argv[1], "rt")) == NULL)
-      {
+      if((yyin = fopen(argv[1], "rt")) == NULL) {
             printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
             return 1;
       }

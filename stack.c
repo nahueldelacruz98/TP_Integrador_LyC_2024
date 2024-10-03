@@ -9,30 +9,36 @@ typedef struct {
     int tope;
 } Pila;
 
+Pila* crear_pila();
+int es_vacia(Pila* pila);
+int es_llena(Pila* pila);
+void apilar(Pila* pila, void* valor);
+void* desapilar(Pila* pila);
+
 // Función para crear una pila vacía
-Pila* CrearPila() {
-    Pila* nuevaPila = (Pila*)malloc(sizeof(Pila));
-    if (!nuevaPila) {
+Pila* crear_pila() {
+    Pila* nueva_pila = (Pila*)malloc(sizeof(Pila));
+    if (!nueva_pila) {
         printf("Error al crear la pila\n");
         return NULL;
     }
-    nuevaPila->tope = -1;
-    return nuevaPila;
+    nueva_pila->tope = -1;
+    return nueva_pila;
 }
 
 // Función para verificar si la pila está vacía
-int esVacia(Pila* pila) {
+int es_vacia(Pila* pila) {
     return pila->tope == -1;
 }
 
 // Función para verificar si la pila está llena
-int esLlena(Pila* pila) {
+int es_llena(Pila* pila) {
     return pila->tope == MAX - 1;
 }
 
 // Función para apilar un puntero
-void Apilar(Pila* pila, void* valor) {
-    if (esLlena(pila)) {
+void apilar(Pila* pila, void* valor) {
+    if (es_llena(pila)) {
         printf("La pila está llena, no se puede apilar\n");
         return;
     }
@@ -41,8 +47,8 @@ void Apilar(Pila* pila, void* valor) {
 }
 
 // Función para desapilar un puntero
-void* Desapilar(Pila* pila) {
-    if (esVacia(pila)) {
+void* desapilar(Pila* pila) {
+    if (es_vacia(pila)) {
         printf("La pila está vacía, no se puede desapilar\n");
         return NULL;
     }
