@@ -21,8 +21,11 @@ extern char* yytext;
 
 FILE *prueba_orden;
 
+struct Nodo *linea_cod_ptr = NULL;
+struct Nodo *codigo_ptr = NULL;
 struct Nodo *asig_var_ptr = NULL;
 struct Nodo *const_var_ptr = NULL;
+
 struct Nodo *sent_arit_ptr = NULL;
 struct Nodo *expr_ptr = NULL;
 struct Nodo *term_ptr = NULL;
@@ -32,6 +35,8 @@ struct Nodo *var_ptr = NULL;
 struct Nodo *decl_ptr = NULL;
 struct Nodo *conj_var_ptr = NULL;
 struct Nodo *tipo_var_ptr = NULL;
+
+struct Pila *pila_sent_aritmetica = NULL;
 
 %}
 
@@ -91,14 +96,14 @@ struct Nodo *tipo_var_ptr = NULL;
 %%
 
 linea_codigo:
-      codigo 
-      | linea_codigo codigo
+      codigo { linea_cod_ptr = codigo_ptr;}
+      | linea_codigo codigo { linea_cod_ptr = crear_nodo("LineaCodigo\n",linea_cod_ptr,codigo_ptr); }
       ;
 
 codigo:
       variables
-      | asignacion_variables {printf("\n");}
-      | sentencia_aritmetica
+      | asignacion_variables { codigo_ptr = asig_var_ptr; printf("\n");}
+      | sentencia_aritmetica { codigo_ptr = sent_arit_ptr;}
       | while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n");} 
       | if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n");}
       | KC START_ELSE KA {printf("\nInicio sentencia IF ELSE.\n\n");}
@@ -177,10 +182,10 @@ asignacion_variables:
             printf("%s se le asigna constante: %s", $1, yytext);
 
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_var_ptr);
-            imprimirInorden(asig_var_ptr);
+            //imprimirInorden(asig_var_ptr);
             //imprimirPreorden(asig_var_ptr);
             //imprimirPostorden(asig_var_ptr);
-            write_intermediate_code("\n");
+            //write_intermediate_code("\n");
       };
       | ID OP_AS get_penultimate_position
       | ID OP_AS binary_count
@@ -246,23 +251,23 @@ valores_admitidos_condicion:
       | constante_variable {printf("CONSTANTE");}
 
 sentencia_aritmetica:
-      ID OP_ARIT expresion    {     
+      ID OP_ARIT {pila_sent_aritmetica = CrearPila();} expresion    {     
                                     sent_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
-                                    imprimirInorden(sent_arit_ptr);
-                                    write_intermediate_code("\n");
+                                    //imprimirInorden(sent_arit_ptr);
+                                    //write_intermediate_code("\n");
                               }
 	;
  
 expresion:
       termino {printf("    Termino es Expresion\n"); expr_ptr = term_ptr;}
-	| expresion OP_SUM termino {printf("    Expresion+Termino es Expresion\n"); expr_ptr = crear_nodo("+", expr_ptr, term_ptr);}
-	| expresion OP_RES termino {printf("    Expresion-Termino es Expresion\n"); expr_ptr = crear_nodo("-", expr_ptr, term_ptr);}
+	| expresion OP_SUM {Apilar(pila_sent_aritmetica,expr_ptr);} termino {printf("    Expresion+Termino es Expresion\n"); expr_ptr = crear_nodo("+", Desapilar(pila_sent_aritmetica), term_ptr);}
+	| expresion OP_RES {Apilar(pila_sent_aritmetica,expr_ptr);} termino {printf("    Expresion-Termino es Expresion\n"); expr_ptr = crear_nodo("-", Desapilar(pila_sent_aritmetica), term_ptr);}
 	;
  
 termino: 
       factor {printf("    Factor es Termino\n"); term_ptr = fact_ptr;}
-      | termino OP_MUL factor {printf("     Termino*Factor es Termino\n"); term_ptr = crear_nodo("*", term_ptr, fact_ptr);}
-      | termino OP_DIV factor {printf("     Termino/Factor es Termino\n"); term_ptr = crear_nodo("/", term_ptr, fact_ptr);}
+      | termino OP_MUL {Apilar(pila_sent_aritmetica,term_ptr);} factor {printf("     Termino*Factor es Termino\n"); term_ptr = crear_nodo("*", Desapilar(pila_sent_aritmetica), fact_ptr);}
+      | termino OP_DIV {Apilar(pila_sent_aritmetica,term_ptr);} factor {printf("     Termino/Factor es Termino\n"); term_ptr = crear_nodo("/", Desapilar(pila_sent_aritmetica), fact_ptr);}
       ;
  
 factor: 
@@ -316,6 +321,7 @@ int main(int argc, char *argv[])
       open_symbol_table();
       create_intermediate_code();
       yyparse();
+      imprimirInorden(linea_cod_ptr);
       close_symbol_table();
       close_intermediate_code();
 	fclose(yyin);

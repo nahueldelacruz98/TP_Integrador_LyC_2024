@@ -27,7 +27,7 @@ int close_intermediate_code() {
 }
 
 int write_intermediate_code(const char *string) {
-    fprintf(intermediate_file, "%s", string);
+    fprintf(intermediate_file, " %s", string);
 
     return 0;
 }

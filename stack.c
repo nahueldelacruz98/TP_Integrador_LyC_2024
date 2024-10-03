@@ -4,14 +4,14 @@
 // Definición de la estructura de la pila
 #define MAX 100  // Tamaño máximo de la pila
 
-typedef struct {
+struct Pila{
     void* elementos[MAX];  // Ahora los elementos son punteros genéricos (void*)
     int tope;
-} Pila;
+} ;
 
 // Función para crear una pila vacía
-Pila* CrearPila() {
-    Pila* nuevaPila = (Pila*)malloc(sizeof(Pila));
+struct Pila *CrearPila() {
+    struct Pila* nuevaPila = (struct Pila*)malloc(sizeof(struct Pila));
     if (!nuevaPila) {
         printf("Error al crear la pila\n");
         return NULL;
@@ -21,17 +21,17 @@ Pila* CrearPila() {
 }
 
 // Función para verificar si la pila está vacía
-int esVacia(Pila* pila) {
+int esVacia(struct Pila* pila) {
     return pila->tope == -1;
 }
 
 // Función para verificar si la pila está llena
-int esLlena(Pila* pila) {
+int esLlena(struct Pila* pila) {
     return pila->tope == MAX - 1;
 }
 
 // Función para apilar un puntero
-void Apilar(Pila* pila, void* valor) {
+void Apilar(struct Pila* pila, void* valor) {
     if (esLlena(pila)) {
         printf("La pila está llena, no se puede apilar\n");
         return;
@@ -41,7 +41,7 @@ void Apilar(Pila* pila, void* valor) {
 }
 
 // Función para desapilar un puntero
-void* Desapilar(Pila* pila) {
+void* Desapilar(struct Pila* pila) {
     if (esVacia(pila)) {
         printf("La pila está vacía, no se puede desapilar\n");
         return NULL;

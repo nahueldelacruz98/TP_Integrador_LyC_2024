@@ -1,16 +1,3 @@
-*- Declaracion de variables -*
-
-init {
-    a1,b1,c1 : Int
-    a2 : String
-}
-
-init {
-    a,x,resFloat : Float
-    b,y : String
-    c,d,z : Int
-}
-
 *- Asignacion/Inicializacion de variables -*
 
 x := 0
@@ -18,84 +5,6 @@ x := -5
 x := -9999999999
 x := 1
 x := 100
- 
-x := 0.1
-x := 1.0
-x := 22.22222
-x := 9.000001
-x := 99999.99
-x := 99.
-x := .9999
- 
-x := -0.1
-x := -1.0
-x := -22.22222
-x := -9.000001
-x := -99999.99
-x := -99.
-x := -.9999
- 
-y := "@sdADaSjfla%dfg$&/8()"
-y := "       asldk  fh sjf "
-y := "1"
-y := " "
-y := "2146546534543"
 
-
-*- Operaciones Aritmeticas -*
-
-resFloat =: a + 1 * (b*c - d) / 1.2
 x =: z * 17.1 + 8
- 
-*- Mientras -*
- 
-mientras (x > y AND NOT d < 0) {
-
-    x =: x - 1
-
-}
- 
-mientras (x >= y OR d <> 0) {
-
-    x =: x - 1
-
-    mientras (x > 5) {
-
-        x =: x - 1
-
-    }
-
-}
- 
-*- Si / Si - sino -*
- 
-si(y <= x) {
-
-        x =: y *2
-
-    }
- 
-si(y >= x) {
-
-        y =: y - 1
-
-    }
- 
-si(y == x) {
-
-        y =: y * 1
-
-    }
-
-*- Entrada y salida -*
-
-leer(a)
-escribir("Hola mundo")
-
-*- Temas especiales -*
-
-a := getPenultimatePosition([3, 8.2, 2, 55.5])
-b := getPenultimatePosition([123456789])
-
-c := binaryCount([110,1,0,5,x,10101100,-1]) 
-d := binaryCount([b]) 
+resFloat =: a + 1 * (b*c - d) / 1.2
