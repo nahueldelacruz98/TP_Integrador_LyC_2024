@@ -67,7 +67,7 @@ void imprimirArbol(struct Nodo* nodo, int nivel) {
     imprimirArbol(nodo->der, nivel + 1);
     
     for (int i = 0; i < nivel; i++) {
-        printf("   ");  // Indentación según el nivel
+        printf("   ");
     }
     printf("%s\n", nodo->valor);
 
@@ -75,12 +75,11 @@ void imprimirArbol(struct Nodo* nodo, int nivel) {
 }
 
 void generarDOT(struct Nodo* nodo, FILE* archivo) {
-    if (nodo == NULL) return;
+    if (nodo == NULL)
+        return;
 
-    // Crea el nodo con un identificador único basado en su dirección de memoria
     fprintf(archivo, "    \"%p\" [label=\"%s\"];\n", (void*)nodo, nodo->valor);
 
-    // Si hay hijos, crea las conexiones hacia los hijos
     if (nodo->izq != NULL) {
         fprintf(archivo, "    \"%p\" -> \"%p\";\n", (void*)nodo, (void*)nodo->izq);
         generarDOT(nodo->izq, archivo);
@@ -99,16 +98,13 @@ void generarArchivoDOT(struct Nodo* raiz) {
         return;
     }
 
-    // Escribe la cabecera del archivo DOT
     fprintf(archivo, "digraph Arbol {\n");
     fprintf(archivo, "    node [fontname=\"Arial\"];\n");
 
-    // Llama a la función para generar el cuerpo del archivo DOT
     if (raiz != NULL) {
         generarDOT(raiz, archivo);
     }
 
-    // Cierra la estructura del archivo DOT
     fprintf(archivo, "}\n");
 
     fclose(archivo);
