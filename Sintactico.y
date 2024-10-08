@@ -28,7 +28,14 @@ struct Nodo *linea_cod_ptr = NULL;
 struct Nodo *codigo_ptr = NULL;
 struct Nodo *init_var = NULL;
 struct Nodo *asig_var_ptr = NULL;
-struct Nodo *const_var_ptr = NULL;
+struct Nodo *const_ptr = NULL;
+struct Nodo *cond_mult_ptr = NULL;
+struct Nodo *cond_ptr = NULL;
+struct Nodo *val_adm_cond_ptr = NULL;
+struct Nodo *comp_ptr = NULL;
+struct Nodo *while_sent_ptr = NULL;
+struct Nodo *if_sent_ptr = NULL;
+struct Nodo *cond_op_ptr = NULL;
 
 struct Nodo *sent_arit_ptr = NULL;
 struct Nodo *expr_ptr = NULL;
@@ -123,8 +130,8 @@ codigo:
       inicializacion_variables {codigo_ptr = init_var;}
       | asignacion_variables {codigo_ptr = asig_var_ptr; printf("\n");}
       | sentencia_aritmetica {codigo_ptr = sent_arit_ptr;}
-      | while_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de ciclo WHILE.\n\n"); } 
-      | if_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de sentencia IF.\n\n"); }
+      | while_sentence {codigo_ptr = while_sent_ptr; printf("FIN de ciclo WHILE.\n\n");}
+      | if_sentence {codigo_ptr = if_sent_ptr; printf("FIN de sentencia IF.\n\n");}
       | LLAVE_C START_ELSE LLAVE_A {printf("\nInicio sentencia IF ELSE.\n\n"); }
       | escritura_sentence
       | lectura_sentence
@@ -139,7 +146,7 @@ inicializacion_variables:
       }
       ;
 
-declaracion: 
+declaracion:
       conjunto_variables DOS_PUNTOS tipo_variables {
             decl_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
       }
@@ -148,7 +155,7 @@ declaracion:
             aux_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
             decl_ptr = crear_nodo("-DECLARACION-", aux_ptr, decl_ptr);
       }
-	;   
+	;
 
 conjunto_variables:
       conjunto_variables COMA ID {
@@ -169,7 +176,7 @@ conjunto_variables:
       }
       ;
          
-tipo_variables: 
+tipo_variables:
       DECL_STRING {
             printf(": variable/s de tipo String.\n"); 
             tipo_var_ptr = crear_hoja("String");
@@ -181,41 +188,30 @@ tipo_variables:
       | DECL_INT {
             printf(": variable/s de tipo Integer.\n"); 
             tipo_var_ptr = crear_hoja("Int");
-      } 
+      }
       ;
 
 asignacion_variables:
-      ID OP_AS constante_variable { 
+      ID OP_AS constante {
             printf("%s se le asigna constante: %s", $1, yytext);
-
-            asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_var_ptr);
-            //imprimirInorden(asig_var_ptr);
-            //imprimirPreorden(asig_var_ptr);
-            //imprimirPostorden(asig_var_ptr);
-            //write_intermediate_code("\n");
+            asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_ptr);
       }
       | ID OP_AS get_penultimate_position {
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), get_pen_pos_ptr);
-            //imprimirInorden(asig_var_ptr);
-            //write_intermediate_code("\n");
-            //generarArchivoDOT(asig_var_ptr);
       }
       | ID OP_AS binary_count {
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), bin_count_ptr);
-            //imprimirInorden(asig_var_ptr);
-            //write_intermediate_code("\n");
-            //generarArchivoDOT(asig_var_ptr);
       }
       ;
 
-constante_variable:
+constante:
       CONST_INT {
             Simbolo simbolo = {"", "CTE_INTEGER", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
 
-            const_var_ptr = crear_hoja($1);
+            const_ptr = crear_hoja($1);
       }
       | CONST_FLOAT {
             Simbolo simbolo = {"", "CTE_FLOAT", "", 0};
@@ -224,7 +220,7 @@ constante_variable:
             snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));
             write_symbol_table(simbolo);
 
-            const_var_ptr = crear_hoja($1);
+            const_ptr = crear_hoja($1);
       }
       | CONST_STRING {
             int len = ((int) strlen(yytext)) - 2;
@@ -235,37 +231,99 @@ constante_variable:
             snprintf(simbolo.valor, MAX_LENGTH, "%.*s", len, yytext + 1);
             write_symbol_table(simbolo);
 
-            const_var_ptr = crear_hoja($1);
+            const_ptr = crear_hoja($1);
       }
       ;
 
 while_sentence:
-      START_WHILE PAREN_A condicion_multiple PAREN_C {printf(" .Sentencia WHILE hace el siguiente codigo:\n\n");}
+      START_WHILE PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
+            printf(" .Sentencia WHILE hace el siguiente codigo:\n\n");
+            while_sent_ptr = crear_nodo("-WHILE-", cond_mult_ptr, linea_cod_ptr);
+      }
       ;
 
 if_sentence:
-      START_IF PAREN_A condicion_multiple PAREN_C {printf(" .Sentencia IF hace el siguiente codigo:\n\n");}
+      START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
+            printf(" .Sentencia IF hace el siguiente codigo:\n\n");
+            if_sent_ptr = crear_nodo("-IF-", cond_mult_ptr, linea_cod_ptr);
+      }
+      | START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A LLAVE_C {
+            if_sent_ptr = crear_nodo("-IF-", cond_mult_ptr, NULL);
+      }
       ;
 
 condicion_multiple:
-      valores_admitidos_condicion comparador valores_admitidos_condicion
-      | COND_OP_NOT valores_admitidos_condicion comparador valores_admitidos_condicion
-      | condicion_multiple COND_OP_AND condicion_multiple
-      | condicion_multiple COND_OP_OR condicion_multiple
+      condicion {
+            cond_mult_ptr = cond_ptr;
+      }
+      | condicion_multiple COND_OP_AND condicion {
+            cond_mult_ptr = crear_nodo("AND", cond_mult_ptr, cond_ptr);
+      }
+      | condicion_multiple COND_OP_OR condicion {
+            cond_mult_ptr = crear_nodo("OR", cond_mult_ptr, cond_ptr);
+      }
       ;
 
-comparador:
-      COMP_MAY {printf(" es mayor a ");}
-      | COMP_MEN {printf(" es menor a ");}
-      | COMP_EQ {printf(" es igual a ");}
-      | COMP_MAY_EQ {printf(" es mayor o igual a ");}
-      | COMP_MEN_EQ {printf(" es menor o igual a ");}
-      | COMP_DIST {printf(" es distinto a ");}
+condicion:
+      valores_admitidos_condicion comparador {
+            comp_ptr->izq = val_adm_cond_ptr;
+      } valores_admitidos_condicion {
+            comp_ptr->der = val_adm_cond_ptr;
+            cond_ptr = comp_ptr;
+      }
+      | COND_OP_NOT valores_admitidos_condicion comparador {
+            comp_ptr->izq = val_adm_cond_ptr;
+      } valores_admitidos_condicion {
+            comp_ptr->der = val_adm_cond_ptr;
+            cond_ptr = crear_nodo("NOT", comp_ptr, NULL);
+      }
+      
+
+condicion_operador:
+      COND_OP_AND {
+            cond_op_ptr = crear_hoja("AND");
+      }
+      | COND_OP_OR {
+            cond_op_ptr = crear_hoja("OR");
+      }
       ;
 
 valores_admitidos_condicion:
-      ID {printf("ID");}
-      | constante_variable {printf("CONSTANTE");}
+      ID {
+            printf("ID");
+            val_adm_cond_ptr = crear_hoja($1);
+      }
+      | constante {
+            printf("CONSTANTE");
+            val_adm_cond_ptr = const_ptr;
+      }
+
+comparador:
+      COMP_MAY {
+            printf(" es mayor a ");
+            comp_ptr = crear_hoja(">");
+      }
+      | COMP_MEN {
+            printf(" es menor a ");
+            comp_ptr = crear_hoja("<");
+      }
+      | COMP_EQ {
+            printf(" es igual a ");
+            comp_ptr = crear_hoja("==");
+      }
+      | COMP_MAY_EQ {
+            printf(" es mayor o igual a ");
+            comp_ptr = crear_hoja(">=");
+      }
+      | COMP_MEN_EQ {
+            printf(" es menor o igual a ");
+            comp_ptr = crear_hoja("<=");
+      }
+      | COMP_DIST {
+            printf(" es distinto a ");
+            comp_ptr = crear_hoja("<>");
+      }
+      ;
 
 sentencia_aritmetica:
       ID OP_ARIT {
@@ -466,9 +524,9 @@ binary_count_lista_aritmetica:
             res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("10"));
             res_nodo = crear_nodo(":=", crear_hoja("@res"), res_nodo);
             
-            //      if(res != 0 | res != 1)
-            condif1_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("0"));
-            condif2_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("1"));
+            //      if(res <> 0 | res <> 1)
+            condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
+            condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
             condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
@@ -541,9 +599,9 @@ binary_count_lista_aritmetica:
             res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("10"));
             res_nodo = crear_nodo(":=", crear_hoja("@res"), res_nodo);
             
-            //      if(res != 0 | res != 1)
-            condif1_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("0"));
-            condif2_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("1"));
+            //      if(res <> 0 | res <> 1)
+            condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
+            condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
             condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
@@ -597,7 +655,6 @@ int main(int argc, char *argv[])
       open_symbol_table();
       create_intermediate_code();
       yyparse();
-      imprimirInorden(linea_cod_ptr);
       close_symbol_table();
       close_intermediate_code();
 	fclose(yyin);

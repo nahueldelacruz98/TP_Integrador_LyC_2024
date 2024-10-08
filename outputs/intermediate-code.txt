@@ -1,1 +1,1 @@
- init a534 : Int -DECLARACION- a3 : Float -DECLARACION- a2 : String -DECLARACION- a1 , b1 , c1 : Int init a534 : Int -DECLARACION- a3 : Float -DECLARACION- a2 : String -DECLARACION- a1 , b1 , c1 : Int
+ x >= 434 NOT AND x > 1 NOT OR x > 2 -WHILE- a =: 7 -LINEA CODIGO- j =: x + 32 -LINEA CODIGO- a =: b
