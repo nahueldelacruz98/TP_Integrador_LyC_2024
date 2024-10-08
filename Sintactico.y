@@ -26,6 +26,7 @@ char* res = NULL;
 
 struct Nodo *linea_cod_ptr = NULL;
 struct Nodo *codigo_ptr = NULL;
+struct Nodo *init_var = NULL;
 struct Nodo *asig_var_ptr = NULL;
 struct Nodo *const_var_ptr = NULL;
 
@@ -36,7 +37,7 @@ struct Nodo *fact_ptr = NULL;
 struct Nodo *var_arit_ptr = NULL;
 struct Nodo *var_ptr = NULL;
 struct Nodo *decl_ptr = NULL;
-struct Nodo *conjunto_variables_ptr = NULL;
+struct Nodo *conj_var_ptr = NULL;
 struct Nodo *tipo_var_ptr = NULL;
 struct Nodo *get_pen_pos_ptr = NULL;
 struct Nodo *vec_num_ptr = NULL;
@@ -103,47 +104,50 @@ Pila *pila_sent_aritmetica = NULL;
 
 %%
 
-linea_codigo:
-      codigo { 
-            linea_cod_ptr = codigo_ptr;
+start:
+      linea_codigo {
             imprimirInorden(linea_cod_ptr);
             generarArchivoDOT(linea_cod_ptr);
       }
+
+linea_codigo:
+      codigo { 
+            linea_cod_ptr = codigo_ptr;
+      }
       | linea_codigo codigo {
             linea_cod_ptr = crear_nodo("-LINEA CODIGO-", linea_cod_ptr, codigo_ptr);
-            imprimirInorden(linea_cod_ptr);
-            generarArchivoDOT(linea_cod_ptr);
       }
       ;
 
 codigo:
-      variables
-      | asignacion_variables { codigo_ptr = asig_var_ptr; printf("\n");}
-      | sentencia_aritmetica { codigo_ptr = sent_arit_ptr;}
-      | while_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de ciclo WHILE.\n\n");} 
-      | if_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de sentencia IF.\n\n");}
-      | LLAVE_C START_ELSE LLAVE_A {printf("\nInicio sentencia IF ELSE.\n\n");}
+      inicializacion_variables {codigo_ptr = init_var;}
+      | asignacion_variables {codigo_ptr = asig_var_ptr; printf("\n");}
+      | sentencia_aritmetica {codigo_ptr = sent_arit_ptr;}
+      | while_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de ciclo WHILE.\n\n"); } 
+      | if_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de sentencia IF.\n\n"); }
+      | LLAVE_C START_ELSE LLAVE_A {printf("\nInicio sentencia IF ELSE.\n\n"); }
       | escritura_sentence
       | lectura_sentence
       | get_penultimate_position
       | binary_count
       ;
 
-variables:
+inicializacion_variables:
       INIT_VAR LLAVE_A declaracion LLAVE_C {
             printf("FIN de declaracion de variables.\n\n");
-
-            var_ptr = crear_nodo("init", NULL, decl_ptr);
-            //imprimirInorden(var_ptr);
-            //write_intermediate_code("\n");
+            init_var = crear_nodo("init", NULL, decl_ptr);
       }
       ;
 
 declaracion: 
       conjunto_variables DOS_PUNTOS tipo_variables {
-            decl_ptr = crear_nodo(":", conjunto_variables_ptr, tipo_var_ptr);
+            decl_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
       }
-      | declaracion conjunto_variables DOS_PUNTOS tipo_variables 
+      | declaracion conjunto_variables DOS_PUNTOS tipo_variables {
+            struct Nodo* aux_ptr;
+            aux_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
+            decl_ptr = crear_nodo("-DECLARACION-", aux_ptr, decl_ptr);
+      }
 	;   
 
 conjunto_variables:
@@ -153,7 +157,7 @@ conjunto_variables:
             write_symbol_table(simbolo);
             printf(",%s",yytext);
             
-            conjunto_variables_ptr = crear_nodo(",", conjunto_variables_ptr, crear_hoja($3));
+            conj_var_ptr = crear_nodo(",", conj_var_ptr, crear_hoja($3));
       }
       | ID {
             Simbolo simbolo = {"", "", "-", 0};
@@ -161,7 +165,7 @@ conjunto_variables:
             write_symbol_table(simbolo);
             printf("%s",yytext);
 
-            conjunto_variables_ptr = crear_hoja($1);
+            conj_var_ptr = crear_hoja($1);
       }
       ;
          
