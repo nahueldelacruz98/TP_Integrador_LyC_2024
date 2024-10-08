@@ -22,6 +22,9 @@ extern char* yytext;
 FILE *prueba_orden;
 Pila *pila;
 
+char* aux = NULL;
+char* res = NULL;
+
 struct Nodo *asig_var_ptr = NULL;
 struct Nodo *const_var_ptr = NULL;
 struct Nodo *sent_arit_ptr = NULL;
@@ -34,9 +37,11 @@ struct Nodo *decl_ptr = NULL;
 struct Nodo *conj_var_ptr = NULL;
 struct Nodo *tipo_var_ptr = NULL;
 struct Nodo *get_pen_pos_ptr = NULL;
-struct Nodo *bin_count_ptr = NULL;
 struct Nodo *vec_num_ptr = NULL;
 struct Nodo *list_arit_ptr = NULL;
+struct Nodo *bin_count_ptr = NULL;
+struct Nodo *bin_count_vec_num_ptr = NULL;
+struct Nodo *bin_count_list_arit_ptr = NULL;
 
 %}
 
@@ -96,7 +101,7 @@ struct Nodo *list_arit_ptr = NULL;
 %%
 
 linea_codigo:
-      codigo 
+      codigo
       | linea_codigo codigo
       ;
 
@@ -104,7 +109,7 @@ codigo:
       variables
       | asignacion_variables {printf("\n");}
       | sentencia_aritmetica
-      | while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n");} 
+      | while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n");}
       | if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n");}
       | KC START_ELSE KA {printf("\nInicio sentencia IF ELSE.\n\n");}
       | escritura_sentence
@@ -113,7 +118,7 @@ codigo:
       | binary_count
       ;
 
-variables:  	   
+variables:
       INIT_VAR KA declaracion KC {
             fprintf(prueba_orden, "<VARIABLES>\n");
             printf("FIN de declaracion de variables.\n\n");
@@ -125,7 +130,7 @@ variables:
       ;
 
 declaracion: 
-      conj_var DOS_PUNTOS tipo_var {      
+      conj_var DOS_PUNTOS tipo_var {
             fprintf(prueba_orden, "<DECLARACION 1> ");
             decl_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
       }
@@ -178,7 +183,6 @@ tipo_var:
       } 
       ;
 
-
 asignacion_variables:
       ID OP_AS constante_variable { 
             printf("%s se le asigna constante: %s", $1, yytext);
@@ -199,6 +203,7 @@ asignacion_variables:
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), bin_count_ptr);
             imprimirInorden(asig_var_ptr);
             write_intermediate_code("\n");
+            generarArchivoDOT(asig_var_ptr);
       }
       ;
 
@@ -313,18 +318,12 @@ factor:
 variable_aritmetica:
       ID {
             var_arit_ptr = crear_hoja($1);
-            
-            apilar(pila, $1);
       }
       | CONST_FLOAT {
             var_arit_ptr = crear_hoja($1);
-            
-            apilar(pila, $1);
       }
       | CONST_INT {
             var_arit_ptr = crear_hoja($1);
-            
-            apilar(pila, $1);
       }
       ;
 
@@ -339,25 +338,10 @@ escritura_sentence:
 
 get_penultimate_position:
       FUNCT_GPP PA vector_numerico PC {
-            void *gpp;
-
             printf("\nEjecutando get_penultimate_position\n");
 
-            desapilar(pila);
-            gpp = desapilar(pila);
-
-            get_pen_pos_ptr = crear_nodo("get_penultimate_position", crear_hoja(gpp), vec_num_ptr);
+            get_pen_pos_ptr = crear_nodo("get_penultimate_position", crear_hoja("@res"), vec_num_ptr);
             imprimirInorden(get_pen_pos_ptr);
-            write_intermediate_code("\n");
-      }
-      ;
-
-binary_count:
-      FUNCT_BC PA vector_numerico PC {
-            printf("\nEjecutando binary_count \n");
-
-            bin_count_ptr = crear_nodo("binary_count", NULL, vec_num_ptr);
-            imprimirInorden(bin_count_ptr);
             write_intermediate_code("\n");
       }
       ;
@@ -371,10 +355,224 @@ vector_numerico:
 
 lista_aritmetica:
       variable_aritmetica {
-            list_arit_ptr = var_arit_ptr;
+            struct Nodo* aux_hoja;
+            struct Nodo* yytext_hoja;
+            struct Nodo* res_hoja;
+
+            struct Nodo* aux_nodo;
+            struct Nodo* res_nodo;
+            struct Nodo* cuerpo_nodo;
+
+            //aux = yytext;
+            aux_hoja = crear_hoja("@aux");
+            yytext_hoja = crear_hoja(yytext);
+            aux_nodo = crear_nodo(":=", aux_hoja, yytext_hoja);
+
+            //res = NULL;
+            res_hoja = crear_hoja("@res");
+            res_nodo = crear_nodo(":=", res_hoja, NULL);
+
+            //list_arit_ptr = var_arit_ptr;
+            cuerpo_nodo = crear_nodo("-CUERPO-", aux_nodo, res_nodo);
+            list_arit_ptr = cuerpo_nodo;
       }
       | lista_aritmetica COMA variable_aritmetica {
-            list_arit_ptr = crear_nodo(",", list_arit_ptr, var_arit_ptr);
+            struct Nodo* aux_hoja;
+            struct Nodo* yytext_hoja;
+            struct Nodo* res_hoja;
+            struct Nodo* aux2_hoja;
+
+            struct Nodo* aux2_nodo;
+            struct Nodo* res_nodo;
+            struct Nodo* cuerpo_nodo;
+
+            //res = aux;
+            res_hoja = crear_hoja("@res");
+            aux_hoja = crear_hoja("@aux");
+            res_nodo = crear_nodo(":=", res_hoja, aux_hoja);
+
+            //aux = yytext;
+            aux2_hoja = crear_hoja("@aux");
+            yytext_hoja = crear_hoja(yytext);
+            aux2_nodo = crear_nodo(":=", aux2_hoja, yytext_hoja);
+
+            cuerpo_nodo = crear_nodo("-CUERPO-", res_nodo, aux2_nodo);
+
+            list_arit_ptr = crear_nodo(",", list_arit_ptr, cuerpo_nodo);
+      }
+      ;
+
+binary_count:
+      FUNCT_BC PA binary_count_vector_numerico PC {
+            printf("\nEjecutando binary_count \n");
+
+            bin_count_ptr = crear_nodo("binary_count", crear_hoja("@count"), bin_count_vec_num_ptr);
+            imprimirInorden(bin_count_ptr);
+            write_intermediate_code("\n");
+      }
+      ;
+
+binary_count_vector_numerico:
+      CORCH_A binary_count_lista_aritmetica CORCH_C {
+            printf("\nVector numerico\n");
+            bin_count_vec_num_ptr = bin_count_list_arit_ptr;
+      }
+      ;
+
+binary_count_lista_aritmetica:
+      variable_aritmetica {
+            struct Nodo* auxiliar_nodo;
+            //bin_count_list_arit_ptr = var_arit_ptr;
+            //count = 0;
+
+            auxiliar_nodo = crear_nodo(":=", crear_hoja("@count"), crear_hoja("0"));
+
+            struct Nodo* asig_nodo = NULL;
+            struct Nodo* res_nodo = NULL;
+            struct Nodo* aux_nodo = NULL;
+            struct Nodo* aux2_nodo = NULL;
+            struct Nodo* flag_nodo = NULL;
+            struct Nodo* condwhile_nodo = NULL;
+            struct Nodo* condif1_nodo = NULL;
+            struct Nodo* condif2_nodo = NULL;
+            struct Nodo* condif3_nodo = NULL;
+            struct Nodo* if_nodo = NULL;
+            struct Nodo* cuerpo_res_nodo = NULL;
+            struct Nodo* cuerpo_if_nodo = NULL;
+            struct Nodo* cuerpo_asig_nodo = NULL;
+            struct Nodo* cuerpo_while_nodo = NULL;
+            struct Nodo* cuerpo_flag_nodo = NULL;
+            struct Nodo* flag_0_nodo = NULL;
+            struct Nodo* if_flag_nodo = NULL;
+            struct Nodo* cond_if_flag_nodo = NULL;
+            struct Nodo* cuerpo_if_flag_nodo = NULL;
+            struct Nodo* count_nodo = NULL;
+            
+            //aux = yytext;
+            asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
+
+            //flag = 0;
+            flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("1"));
+
+            //      res := aux % 10;
+            res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("10"));
+            res_nodo = crear_nodo(":=", crear_hoja("@res"), res_nodo);
+            
+            //      if(res != 0 | res != 1)
+            condif1_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("0"));
+            condif2_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("1"));
+            condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
+
+            //            flag := 0;
+            flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
+
+            if_nodo = crear_nodo("IF", condif3_nodo, flag_0_nodo);
+
+            //      aux := aux / 10;
+            aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
+            aux_nodo = crear_nodo(":=", crear_hoja("@aux"), aux_nodo);
+
+            cuerpo_if_nodo = crear_nodo("-CUERPO-", if_nodo, aux_nodo);
+            cuerpo_res_nodo = crear_nodo("-CUERPO-", res_nodo, cuerpo_if_nodo);
+
+            //while(aux > 0):
+            condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
+            condwhile_nodo = crear_nodo("WHILE", condwhile_nodo, cuerpo_res_nodo);
+
+            //aux := aux / 10;
+            aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
+            aux2_nodo = crear_nodo(":=", crear_hoja("@aux"), aux2_nodo);
+
+            //if(flag == 1)
+            cond_if_flag_nodo = crear_nodo("==", crear_hoja("@flag"), crear_hoja("1"));
+
+            //      count := count + 1;
+            count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
+            count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
+
+            if_flag_nodo = crear_nodo("IF", cond_if_flag_nodo, count_nodo);
+
+            cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
+            cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, cuerpo_if_flag_nodo);
+            cuerpo_flag_nodo = crear_nodo("-CUERPO-", flag_nodo, cuerpo_while_nodo);
+            cuerpo_asig_nodo = crear_nodo("-CUERPO-", asig_nodo, cuerpo_flag_nodo);
+
+            bin_count_list_arit_ptr = cuerpo_asig_nodo;
+            
+            bin_count_list_arit_ptr = crear_nodo("-CUERPO-", auxiliar_nodo, bin_count_list_arit_ptr);
+      }
+      | binary_count_lista_aritmetica COMA variable_aritmetica {
+            struct Nodo* asig_nodo = NULL;
+            struct Nodo* res_nodo = NULL;
+            struct Nodo* aux_nodo = NULL;
+            struct Nodo* aux2_nodo = NULL;
+            struct Nodo* flag_nodo = NULL;
+            struct Nodo* condwhile_nodo = NULL;
+            struct Nodo* condif1_nodo = NULL;
+            struct Nodo* condif2_nodo = NULL;
+            struct Nodo* condif3_nodo = NULL;
+            struct Nodo* if_nodo = NULL;
+            struct Nodo* cuerpo_res_nodo = NULL;
+            struct Nodo* cuerpo_if_nodo = NULL;
+            struct Nodo* cuerpo_asig_nodo = NULL;
+            struct Nodo* cuerpo_while_nodo = NULL;
+            struct Nodo* cuerpo_flag_nodo = NULL;
+            struct Nodo* flag_0_nodo = NULL;
+            struct Nodo* if_flag_nodo = NULL;
+            struct Nodo* cond_if_flag_nodo = NULL;
+            struct Nodo* cuerpo_if_flag_nodo = NULL;
+            struct Nodo* count_nodo = NULL;
+            
+            //aux = yytext;
+            asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
+
+            //flag = 0;
+            flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("1"));
+
+            //      res := aux % 10;
+            res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("10"));
+            res_nodo = crear_nodo(":=", crear_hoja("@res"), res_nodo);
+            
+            //      if(res != 0 | res != 1)
+            condif1_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("0"));
+            condif2_nodo = crear_nodo("!=", crear_hoja("@res"), crear_hoja("1"));
+            condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
+
+            //            flag := 0;
+            flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
+
+            if_nodo = crear_nodo("IF", condif3_nodo, flag_0_nodo);
+
+            //      aux := aux / 10;
+            aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
+            aux_nodo = crear_nodo(":=", crear_hoja("@aux"), aux_nodo);
+
+            cuerpo_if_nodo = crear_nodo("-CUERPO-", if_nodo, aux_nodo);
+            cuerpo_res_nodo = crear_nodo("-CUERPO-", res_nodo, cuerpo_if_nodo);
+
+            //while(aux > 0):
+            condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
+            condwhile_nodo = crear_nodo("WHILE", condwhile_nodo, cuerpo_res_nodo);
+
+            //aux := aux / 10;
+            aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
+            aux2_nodo = crear_nodo(":=", crear_hoja("@aux"), aux2_nodo);
+
+            //if(flag == 1)
+            cond_if_flag_nodo = crear_nodo("==", crear_hoja("@flag"), crear_hoja("1"));
+
+            //      count := count + 1;
+            count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
+            count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
+
+            if_flag_nodo = crear_nodo("IF", cond_if_flag_nodo, count_nodo);
+
+            cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
+            cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, cuerpo_if_flag_nodo);
+            cuerpo_flag_nodo = crear_nodo("-CUERPO-", flag_nodo, cuerpo_while_nodo);
+            cuerpo_asig_nodo = crear_nodo("-CUERPO-", asig_nodo, cuerpo_flag_nodo);
+
+            bin_count_list_arit_ptr = crear_nodo(",", bin_count_list_arit_ptr, cuerpo_asig_nodo);
       }
       ;
 
