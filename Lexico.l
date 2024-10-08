@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
-#include "utils.c"
+
+#include "utils/verificar-longitud.c"
 
 FILE *yyin;
 char *yyltext;
@@ -18,16 +19,16 @@ DIGITO			[0-9]
 LETRA			[a-zA-Z]
 
 ID			    {LETRA}({LETRA}|{DIGITO})*
-OP_AS   		":="
+OP_AS 		    ":="
 OP_ARIT         "=:"
 OP_SUM		    "+"
 OP_MUL          "*"
 OP_RES		    "-"
 OP_DIV          "/"
-PA			    "("
-PC			    ")"
-KA              "{"
-KC              "}"
+PAREN_A			"("
+PAREN_C			")"
+LLAVE_A         "{"
+LLAVE_C         "}"
 CORCH_A         "["
 CORCH_C         "]"
 DOS_PUNTOS      ":"
@@ -55,12 +56,12 @@ START_ESCRITURA     "escribir"
 CONST_FLOAT         "-"?({DIGITO}+"."{DIGITO}+|{DIGITO}+"."|"."{DIGITO}+)
 CONST_STRING        {COMILLA}[^\"]*{COMILLA}
 CONST_INT           "-"?{DIGITO}+
+CONST_BINARY        ("0"|"1")+
 
 COND_OP_NOT	        "NOT"
 COND_OP_AND	        "AND"
 COND_OP_OR	        "OR"
 
-CONST_BINARY        ("0"|"1")+
 FUNCT_BC            "binaryCount"
 FUNCT_GPP           "getPenultimatePosition"
 
@@ -94,10 +95,10 @@ FUNCT_GPP           "getPenultimatePosition"
 {OP_RES}		{return OP_RES;}
 {OP_DIV}		{return OP_DIV;}
 {OP_ARIT}       {return OP_ARIT;}
-{PA}			{return PA;}
-{PC}			{return PC;}
-{KA}            {return KA;}
-{KC}            {return KC;}
+{PAREN_A}			{return PAREN_A;}
+{PAREN_C}			{return PAREN_C;}
+{LLAVE_A}            {return LLAVE_A;}
+{LLAVE_C}            {return LLAVE_C;}
 {CORCH_A}       {return CORCH_A;}
 {CORCH_C}       {return CORCH_C;}
 {COMA}          {return COMA;}

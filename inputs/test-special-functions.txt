@@ -1,0 +1,2 @@
+y := binaryCount([110,-1,3])
+a := getPenultimatePosition([3, 8.2, 2, 55.5])

@@ -92,7 +92,7 @@ si(y == x) {
 leer(a)
 escribir("Hola mundo")
 
-*- Temas especiales -*
+*- Funciones especiales -*
 
 a := getPenultimatePosition([3, 8.2, 2, 55.5])
 b := getPenultimatePosition([123456789])

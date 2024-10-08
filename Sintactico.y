@@ -6,10 +6,10 @@
 #include <string.h>
 #include "y.tab.h"
 
-#include "symbol-table.c"
-#include "intermediate-code.c"
-#include "arbol-sintactico.c"
-#include "stack.c"
+#include "utils/intermediate-code.c"
+#include "utils/arbol-sintactico.c"
+#include "utils/symbol-table.c"
+#include "utils/pila.c"
 
 int yystopparser=0;
 FILE *yyin;
@@ -19,7 +19,6 @@ int yylex();
 
 extern char* yytext;
 
-FILE *prueba_orden;
 Pila *pila;
 
 char* aux = NULL;
@@ -37,7 +36,7 @@ struct Nodo *fact_ptr = NULL;
 struct Nodo *var_arit_ptr = NULL;
 struct Nodo *var_ptr = NULL;
 struct Nodo *decl_ptr = NULL;
-struct Nodo *conj_var_ptr = NULL;
+struct Nodo *conjunto_variables_ptr = NULL;
 struct Nodo *tipo_var_ptr = NULL;
 struct Nodo *get_pen_pos_ptr = NULL;
 struct Nodo *vec_num_ptr = NULL;
@@ -58,23 +57,24 @@ Pila *pila_sent_aritmetica = NULL;
 
 %token <strval> ID
 %token <strval> CONST_INT
+%token <strval> CONST_FLOAT
 %token <strval> CONST_STRING
-%token <strval> INIT_VAR
+%token <strval> CONST_BINARY
 %token <strval> DECL_STRING
 %token <strval> DECL_INT
 %token <strval> DECL_FLOAT
-%token <strval> KC
 %token <strval> OP_AS
 %token <strval> OP_SUM
 %token <strval> OP_MUL
 %token <strval> OP_RES
 %token <strval> OP_DIV
-%token <strval> PA
-%token <strval> PC
 %token <strval> OP_ARIT
-%token <strval> KA
+%token <strval> PAREN_A
+%token <strval> PAREN_C
 %token <strval> CORCH_A
 %token <strval> CORCH_C
+%token <strval> LLAVE_A
+%token <strval> LLAVE_C
 %token <strval> DOS_PUNTOS
 %token <strval> COMA
 %token <strval> COMILLA
@@ -93,30 +93,36 @@ Pila *pila_sent_aritmetica = NULL;
 %token <strval> START_LECTURA
 %token <strval> START_ESCRITURA
 
-%token <strval> CONST_FLOAT
-
 %token <strval> COND_OP_NOT
 %token <strval> COND_OP_AND
 %token <strval> COND_OP_OR
 
-%token <strval> CONST_BINARY
+%token <strval> INIT_VAR
 %token <strval> FUNCT_BC
 %token <strval> FUNCT_GPP
 
 %%
 
 linea_codigo:
-      codigo { linea_cod_ptr = codigo_ptr;}
-      | linea_codigo codigo { linea_cod_ptr = crear_nodo("LineaCodigo\n",linea_cod_ptr,codigo_ptr); }
+      codigo { 
+            linea_cod_ptr = codigo_ptr;
+            imprimirInorden(linea_cod_ptr);
+            generarArchivoDOT(linea_cod_ptr);
+      }
+      | linea_codigo codigo {
+            linea_cod_ptr = crear_nodo("-LINEA CODIGO-", linea_cod_ptr, codigo_ptr);
+            imprimirInorden(linea_cod_ptr);
+            generarArchivoDOT(linea_cod_ptr);
+      }
       ;
 
 codigo:
       variables
       | asignacion_variables { codigo_ptr = asig_var_ptr; printf("\n");}
       | sentencia_aritmetica { codigo_ptr = sent_arit_ptr;}
-      | while_sentence KA linea_codigo KC {printf("FIN de ciclo WHILE.\n\n");} 
-      | if_sentence KA linea_codigo KC {printf("FIN de sentencia IF.\n\n");}
-      | KC START_ELSE KA {printf("\nInicio sentencia IF ELSE.\n\n");}
+      | while_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de ciclo WHILE.\n\n");} 
+      | if_sentence LLAVE_A linea_codigo LLAVE_C {printf("FIN de sentencia IF.\n\n");}
+      | LLAVE_C START_ELSE LLAVE_A {printf("\nInicio sentencia IF ELSE.\n\n");}
       | escritura_sentence
       | lectura_sentence
       | get_penultimate_position
@@ -124,65 +130,51 @@ codigo:
       ;
 
 variables:
-      INIT_VAR KA declaracion KC {
-            fprintf(prueba_orden, "<VARIABLES>\n");
+      INIT_VAR LLAVE_A declaracion LLAVE_C {
             printf("FIN de declaracion de variables.\n\n");
 
             var_ptr = crear_nodo("init", NULL, decl_ptr);
-            imprimirInorden(var_ptr);
-            write_intermediate_code("\n");
+            //imprimirInorden(var_ptr);
+            //write_intermediate_code("\n");
       }
       ;
 
 declaracion: 
-      conj_var DOS_PUNTOS tipo_var {
-            fprintf(prueba_orden, "<DECLARACION 1> ");
-            decl_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
+      conjunto_variables DOS_PUNTOS tipo_variables {
+            decl_ptr = crear_nodo(":", conjunto_variables_ptr, tipo_var_ptr);
       }
-      | declaracion conj_var DOS_PUNTOS tipo_var {
-            fprintf(prueba_orden, "<DECLARACION 2> ");
-      }
+      | declaracion conjunto_variables DOS_PUNTOS tipo_variables 
 	;   
 
-conj_var:
-      conj_var COMA ID {
-            fprintf(prueba_orden, "<CONJ_VAR 1> ");
-
+conjunto_variables:
+      conjunto_variables COMA ID {
             Simbolo simbolo = {"", "", "-", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
             printf(",%s",yytext);
             
-            conj_var_ptr = crear_nodo(",", conj_var_ptr, crear_hoja($3));
+            conjunto_variables_ptr = crear_nodo(",", conjunto_variables_ptr, crear_hoja($3));
       }
       | ID {
-            fprintf(prueba_orden, "<CONJ_VAR 2> ");
-
             Simbolo simbolo = {"", "", "-", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
             printf("%s",yytext);
 
-            conj_var_ptr = crear_hoja($1);
+            conjunto_variables_ptr = crear_hoja($1);
       }
       ;
          
-tipo_var: 
+tipo_variables: 
       DECL_STRING {
-            fprintf(prueba_orden, "<TIPO_VAR 1> ");
-
             printf(": variable/s de tipo String.\n"); 
             tipo_var_ptr = crear_hoja("String");
       }
       | DECL_FLOAT {
-            fprintf(prueba_orden, "<TIPO_VAR 2> ");
-
             printf(": variable/s de tipo Float.\n"); 
             tipo_var_ptr = crear_hoja("Float");
       }
       | DECL_INT {
-            fprintf(prueba_orden, "<TIPO_VAR 3> ");
-
             printf(": variable/s de tipo Integer.\n"); 
             tipo_var_ptr = crear_hoja("Int");
       } 
@@ -200,15 +192,15 @@ asignacion_variables:
       }
       | ID OP_AS get_penultimate_position {
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), get_pen_pos_ptr);
-            imprimirInorden(asig_var_ptr);
-            write_intermediate_code("\n");
-            generarArchivoDOT(asig_var_ptr);
+            //imprimirInorden(asig_var_ptr);
+            //write_intermediate_code("\n");
+            //generarArchivoDOT(asig_var_ptr);
       }
       | ID OP_AS binary_count {
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), bin_count_ptr);
-            imprimirInorden(asig_var_ptr);
-            write_intermediate_code("\n");
-            generarArchivoDOT(asig_var_ptr);
+            //imprimirInorden(asig_var_ptr);
+            //write_intermediate_code("\n");
+            //generarArchivoDOT(asig_var_ptr);
       }
       ;
 
@@ -244,11 +236,11 @@ constante_variable:
       ;
 
 while_sentence:
-      START_WHILE PA condicion_multiple PC {printf(" .Sentencia WHILE hace el siguiente codigo:\n\n");}
+      START_WHILE PAREN_A condicion_multiple PAREN_C {printf(" .Sentencia WHILE hace el siguiente codigo:\n\n");}
       ;
 
 if_sentence:
-      START_IF PA condicion_multiple PC {printf(" .Sentencia IF hace el siguiente codigo:\n\n");}
+      START_IF PAREN_A condicion_multiple PAREN_C {printf(" .Sentencia IF hace el siguiente codigo:\n\n");}
       ;
 
 condicion_multiple:
@@ -321,7 +313,7 @@ factor:
             printf("    %s es Factor\n", yytext); 
             fact_ptr = var_arit_ptr;
       }
-	| PA expresion PC {
+	| PAREN_A expresion PAREN_C {
             printf("    Expresion entre parentesis es Factor\n"); 
             fact_ptr = expr_ptr;
       }
@@ -340,16 +332,16 @@ variable_aritmetica:
       ;
 
 lectura_sentence:
-      START_LECTURA PA ID PC {printf("Comienzo de lectura. Guardar resultado en ID.\n");}
+      START_LECTURA PAREN_A ID PAREN_C {printf("Comienzo de lectura. Guardar resultado en ID.\n");}
       ;
 
 escritura_sentence:
-      START_ESCRITURA PA CONST_STRING PC  {printf("Comienzo de escritura de constante STRING.\n");}
-      | START_ESCRITURA PA ID PC {printf("Comienzo de escritura de valor de ID.\n");}
+      START_ESCRITURA PAREN_A CONST_STRING PAREN_C  {printf("Comienzo de escritura de constante STRING.\n");}
+      | START_ESCRITURA PAREN_A ID PAREN_C {printf("Comienzo de escritura de valor de ID.\n");}
       ;
 
 get_penultimate_position:
-      FUNCT_GPP PA vector_numerico PC {
+      FUNCT_GPP PAREN_A vector_numerico PAREN_C {
             printf("\nEjecutando get_penultimate_position\n");
 
             get_pen_pos_ptr = crear_nodo("get_penultimate_position", crear_hoja("@res"), vec_num_ptr);
@@ -415,7 +407,7 @@ lista_aritmetica:
       ;
 
 binary_count:
-      FUNCT_BC PA binary_count_vector_numerico PC {
+      FUNCT_BC PAREN_A binary_count_vector_numerico PAREN_C {
             printf("\nEjecutando binary_count \n");
 
             bin_count_ptr = crear_nodo("binary_count", crear_hoja("@count"), bin_count_vec_num_ptr);
@@ -592,7 +584,6 @@ binary_count_lista_aritmetica:
 
 int main(int argc, char *argv[])
 {
-      prueba_orden = fopen("prueba_orden.txt", "wt");
       pila = crear_pila();
 
       if((yyin = fopen(argv[1], "rt")) == NULL) {
@@ -606,8 +597,6 @@ int main(int argc, char *argv[])
       close_symbol_table();
       close_intermediate_code();
 	fclose(yyin);
-
-      fclose(prueba_orden);
 
       return 0;
 }

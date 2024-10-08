@@ -1,6 +1,6 @@
 #include<stdio.h>
 
-#define NAME_INTERMEDIATE_CODE_FILE "intermediate-code.txt"
+#define NAME_INTERMEDIATE_CODE_FILE "outputs/intermediate-code.txt"
 
 FILE *intermediate_file;
 

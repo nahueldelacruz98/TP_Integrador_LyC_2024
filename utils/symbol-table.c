@@ -1,7 +1,7 @@
 #include<stdio.h>
 
 #define MAX_LENGTH 40
-#define NAME_SYMBOL_TABLE_FILE "symbol-table.txt"
+#define NAME_SYMBOL_TABLE_FILE "outputs/symbol-table.txt"
 
 typedef struct {
     char nombre[MAX_LENGTH];
