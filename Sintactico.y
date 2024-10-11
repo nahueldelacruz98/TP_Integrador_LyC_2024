@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>  // Include this header for boolean variables support
 #include "y.tab.h"
 
 #include "utils/intermediate-code.c"
@@ -52,8 +53,11 @@ struct Nodo *list_arit_ptr = NULL;
 struct Nodo *bin_count_ptr = NULL;
 struct Nodo *bin_count_vec_num_ptr = NULL;
 struct Nodo *bin_count_list_arit_ptr = NULL;
+struct Nodo *lectura_ptr = NULL;
+struct Nodo *escritura_ptr = NULL;
 
 Pila *pila_sent_aritmetica = NULL;
+bool boolNegativeCondition = false;
 
 %}
 
@@ -133,8 +137,8 @@ codigo:
       | while_sentence {codigo_ptr = while_sent_ptr; printf("FIN de ciclo WHILE.\n\n");}
       | if_sentence {codigo_ptr = if_sent_ptr; printf("FIN de sentencia IF.\n\n");}
       | LLAVE_C START_ELSE LLAVE_A {printf("\nInicio sentencia IF ELSE.\n\n"); }
-      | escritura_sentence
-      | lectura_sentence
+      | escritura_sentence { codigo_ptr = escritura_ptr; }
+      | lectura_sentence { codigo_ptr = lectura_ptr; }
       | get_penultimate_position
       | binary_count
       ;
@@ -236,9 +240,8 @@ constante:
       ;
 
 while_sentence:
-      START_WHILE PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
-            printf(" .Sentencia WHILE hace el siguiente codigo:\n\n");
-            while_sent_ptr = crear_nodo("-WHILE-", cond_mult_ptr, linea_cod_ptr);
+      START_WHILE PAREN_A {printf("Sentencia WHILE hace el siguiente codigo:\n\n");} condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
+                  while_sent_ptr = crear_nodo("-WHILE-", cond_mult_ptr, linea_cod_ptr);
       }
       ;
 
@@ -265,29 +268,16 @@ condicion_multiple:
       ;
 
 condicion:
-      valores_admitidos_condicion comparador {
-            comp_ptr->izq = val_adm_cond_ptr;
-      } valores_admitidos_condicion {
+      valores_admitidos_condicion comparador { comp_ptr->izq = val_adm_cond_ptr; } valores_admitidos_condicion {
             comp_ptr->der = val_adm_cond_ptr;
             cond_ptr = comp_ptr;
       }
-      | COND_OP_NOT valores_admitidos_condicion comparador {
-            comp_ptr->izq = val_adm_cond_ptr;
-      } valores_admitidos_condicion {
+      | COND_OP_NOT {boolNegativeCondition = true;} valores_admitidos_condicion comparador { comp_ptr->izq = val_adm_cond_ptr; } valores_admitidos_condicion {
             comp_ptr->der = val_adm_cond_ptr;
-            cond_ptr = crear_nodo("NOT", comp_ptr, NULL);
-      }
+            cond_ptr = comp_ptr;
+            //cond_ptr = crear_nodo("NOT", comp_ptr, NULL);
+      };
       
-
-condicion_operador:
-      COND_OP_AND {
-            cond_op_ptr = crear_hoja("AND");
-      }
-      | COND_OP_OR {
-            cond_op_ptr = crear_hoja("OR");
-      }
-      ;
-
 valores_admitidos_condicion:
       ID {
             printf("ID");
@@ -296,34 +286,33 @@ valores_admitidos_condicion:
       | constante {
             printf("CONSTANTE");
             val_adm_cond_ptr = const_ptr;
-      }
+      };
 
 comparador:
       COMP_MAY {
             printf(" es mayor a ");
-            comp_ptr = crear_hoja(">");
+            if(boolNegativeCondition) { comp_ptr = crear_hoja("<="); boolNegativeCondition = false;} else { comp_ptr = crear_hoja(">"); }
       }
       | COMP_MEN {
             printf(" es menor a ");
-            comp_ptr = crear_hoja("<");
+            if(boolNegativeCondition) { comp_ptr = crear_hoja(">="); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("<"); }
       }
       | COMP_EQ {
             printf(" es igual a ");
-            comp_ptr = crear_hoja("==");
+            if(boolNegativeCondition) { comp_ptr = crear_hoja("<>"); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("=="); }
       }
       | COMP_MAY_EQ {
             printf(" es mayor o igual a ");
-            comp_ptr = crear_hoja(">=");
+            if(boolNegativeCondition) { comp_ptr = crear_hoja("<"); boolNegativeCondition = false;} else { comp_ptr = crear_hoja(">="); }
       }
       | COMP_MEN_EQ {
             printf(" es menor o igual a ");
-            comp_ptr = crear_hoja("<=");
+            if(boolNegativeCondition) { comp_ptr = crear_hoja(">"); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("<="); }
       }
       | COMP_DIST {
             printf(" es distinto a ");
-            comp_ptr = crear_hoja("<>");
-      }
-      ;
+            if(boolNegativeCondition) { comp_ptr = crear_hoja("=="); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("<>"); }
+      };
 
 sentencia_aritmetica:
       ID OP_ARIT {
@@ -332,8 +321,7 @@ sentencia_aritmetica:
             sent_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
             //imprimirInorden(sent_arit_ptr);
             //write_intermediate_code("\n");
-      }
-	;
+      };
  
 expresion:
       termino {
@@ -351,8 +339,7 @@ expresion:
       } termino {
             printf("    Expresion-Termino es Expresion\n"); 
             expr_ptr = crear_nodo("-", desapilar(pila_sent_aritmetica), term_ptr);
-      }
-	;
+      };
  
 termino: 
       factor {printf("    Factor es Termino\n"); term_ptr = fact_ptr;}
@@ -367,8 +354,7 @@ termino:
             } factor {
                   printf("     Termino/Factor es Termino\n"); 
                   term_ptr = crear_nodo("/", desapilar(pila_sent_aritmetica), fact_ptr);
-            }
-      ;
+            };
  
 factor: 
       variable_aritmetica {
@@ -394,12 +380,14 @@ variable_aritmetica:
       ;
 
 lectura_sentence:
-      START_LECTURA PAREN_A ID PAREN_C {printf("Comienzo de lectura. Guardar resultado en ID.\n");}
+      START_LECTURA PAREN_A ID PAREN_C {
+            lectura_ptr = crear_nodo("->",crear_hoja("READ"), crear_hoja($3));
+            printf("Comienzo de lectura. Guardar resultado en ID.\n");}
       ;
 
 escritura_sentence:
-      START_ESCRITURA PAREN_A CONST_STRING PAREN_C  {printf("Comienzo de escritura de constante STRING.\n");}
-      | START_ESCRITURA PAREN_A ID PAREN_C {printf("Comienzo de escritura de valor de ID.\n");}
+      START_ESCRITURA PAREN_A CONST_STRING PAREN_C  {escritura_ptr = crear_nodo("<-",crear_hoja("WRITE"), crear_hoja($3)); printf("Comienzo de escritura de constante STRING.\n");}
+      | START_ESCRITURA PAREN_A ID PAREN_C {escritura_ptr = crear_nodo("<-",crear_hoja("WRITE"), crear_hoja($3)); printf("Comienzo de escritura de valor de ID.\n");}
       ;
 
 get_penultimate_position:
@@ -409,8 +397,7 @@ get_penultimate_position:
             get_pen_pos_ptr = crear_nodo("get_penultimate_position", crear_hoja("@res"), vec_num_ptr);
             imprimirInorden(get_pen_pos_ptr);
             write_intermediate_code("\n");
-      }
-      ;
+      };
 
 vector_numerico:
       CORCH_A lista_aritmetica CORCH_C {
