@@ -54,3 +54,19 @@ void* desapilar(Pila* pila) {
     }
     return pila->elementos[(pila->tope)--];
 }
+
+void mostrar_pila(Pila* pila) {
+    if (es_vacia(pila)) {
+        printf("La pila está vacía\n");
+        return;
+    }
+    
+    printf("Elementos de la pila:\n");
+    for (int i = pila->tope; i >= 0; i--) {
+        printf("%p\n", pila->elementos[i]);
+    }
+}
+
+void liberar_pila(Pila* pila) {
+    free(pila);
+}

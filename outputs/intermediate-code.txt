@@ -1,1 +1,1 @@
- x >= 434 NOT AND x > 1 NOT OR x > 2 -WHILE- a =: 7 -LINEA CODIGO- j =: x + 32 -LINEA CODIGO- a =: b
+ x =: y -LINEA CODIGO- a > 1 -IF- b =: 2 -LINEA CODIGO- c < 3 -IF- d =: 4 -LINEA CODIGO- e == 5 -IF- x =: 4 -LINEA CODIGO- y =: 7 -LINEA CODIGO- e =: 88

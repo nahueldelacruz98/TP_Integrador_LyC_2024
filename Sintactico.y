@@ -14,13 +14,17 @@
 
 int yystopparser=0;
 FILE *yyin;
+FILE *or;
 
 int yyerror();
 int yylex();
 
 extern char* yytext;
 
-Pila *pila;
+Pila *pila = NULL;
+Pila *pila_cond = NULL;
+Pila *pila_sent_aritmetica = NULL;
+bool boolNegativeCondition = false;
 
 char* aux = NULL;
 char* res = NULL;
@@ -55,9 +59,6 @@ struct Nodo *bin_count_vec_num_ptr = NULL;
 struct Nodo *bin_count_list_arit_ptr = NULL;
 struct Nodo *lectura_ptr = NULL;
 struct Nodo *escritura_ptr = NULL;
-
-Pila *pila_sent_aritmetica = NULL;
-bool boolNegativeCondition = false;
 
 %}
 
@@ -122,20 +123,44 @@ start:
       }
 
 linea_codigo:
-      codigo { 
+      codigo {
             linea_cod_ptr = codigo_ptr;
+            apilar(pila, linea_cod_ptr);
+            mostrar_pila(pila);
+            fprintf(or, "linea_codigo_1\n");
       }
       | linea_codigo codigo {
-            linea_cod_ptr = crear_nodo("-LINEA CODIGO-", linea_cod_ptr, codigo_ptr);
+            linea_cod_ptr = crear_nodo("-LINEA CODIGO-", desapilar(pila), codigo_ptr);
+            apilar(pila, linea_cod_ptr);
+            mostrar_pila(pila);
+            fprintf(or, "linea_codigo_2\n");
       }
       ;
 
 codigo:
-      inicializacion_variables {codigo_ptr = init_var;}
-      | asignacion_variables {codigo_ptr = asig_var_ptr; printf("\n");}
-      | sentencia_aritmetica {codigo_ptr = sent_arit_ptr;}
-      | while_sentence {codigo_ptr = while_sent_ptr; printf("FIN de ciclo WHILE.\n\n");}
-      | if_sentence {codigo_ptr = if_sent_ptr; printf("FIN de sentencia IF.\n\n");}
+      inicializacion_variables {
+            codigo_ptr = init_var;
+            fprintf(or, "codigo_1\n");
+      }
+      | asignacion_variables {
+            codigo_ptr = asig_var_ptr; 
+            printf("\n");
+            fprintf(or, "codigo_2\n");
+      }
+      | sentencia_aritmetica {
+            codigo_ptr = sent_arit_ptr;
+            fprintf(or, "codigo_3\n");
+      }
+      | while_sentence {
+            codigo_ptr = while_sent_ptr; 
+            printf("FIN de ciclo WHILE.\n\n");
+            fprintf(or, "codigo_4\n");
+      }
+      | if_sentence {
+            codigo_ptr = if_sent_ptr;
+            printf("FIN de sentencia IF.\n\n");
+            fprintf(or, "codigo_5\n");
+      }
       | LLAVE_C START_ELSE LLAVE_A {printf("\nInicio sentencia IF ELSE.\n\n"); }
       | escritura_sentence { codigo_ptr = escritura_ptr; }
       | lectura_sentence { codigo_ptr = lectura_ptr; }
@@ -197,14 +222,17 @@ tipo_variables:
 
 asignacion_variables:
       ID OP_AS constante {
-            printf("%s se le asigna constante: %s", $1, yytext);
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_ptr);
+            fprintf(or, "asignacion_variables_1\n");
+            printf("%s se le asigna constante: %s", $1, yytext);
       }
       | ID OP_AS get_penultimate_position {
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), get_pen_pos_ptr);
+            fprintf(or, "asignacion_variables_2\n");
       }
       | ID OP_AS binary_count {
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), bin_count_ptr);
+            fprintf(or, "asignacion_variables_3\n");
       }
       ;
 
@@ -216,6 +244,7 @@ constante:
             write_symbol_table(simbolo);
 
             const_ptr = crear_hoja($1);
+            fprintf(or, "constante_1\n");
       }
       | CONST_FLOAT {
             Simbolo simbolo = {"", "CTE_FLOAT", "", 0};
@@ -225,6 +254,7 @@ constante:
             write_symbol_table(simbolo);
 
             const_ptr = crear_hoja($1);
+            fprintf(or, "constante_2\n");
       }
       | CONST_STRING {
             int len = ((int) strlen(yytext)) - 2;
@@ -236,6 +266,7 @@ constante:
             write_symbol_table(simbolo);
 
             const_ptr = crear_hoja($1);
+            fprintf(or, "constante_3\n");
       }
       ;
 
@@ -247,23 +278,30 @@ while_sentence:
 
 if_sentence:
       START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
-            printf(" .Sentencia IF hace el siguiente codigo:\n\n");
-            if_sent_ptr = crear_nodo("-IF-", cond_mult_ptr, linea_cod_ptr);
+            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), desapilar(pila));
+            fprintf(or, "if_sentence_1\n");
+            printf("Sentencia IF hace el siguiente codigo:\n\n");
+            mostrar_pila(pila);
       }
       | START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A LLAVE_C {
             if_sent_ptr = crear_nodo("-IF-", cond_mult_ptr, NULL);
+            fprintf(or, "if_sentence_2\n");
       }
       ;
 
 condicion_multiple:
       condicion {
             cond_mult_ptr = cond_ptr;
+            apilar(pila_cond, cond_mult_ptr);
+            fprintf(or, "condicion_multiple_1\n");
       }
       | condicion_multiple COND_OP_AND condicion {
             cond_mult_ptr = crear_nodo("AND", cond_mult_ptr, cond_ptr);
+            fprintf(or, "condicion_multiple_2\n");
       }
       | condicion_multiple COND_OP_OR condicion {
             cond_mult_ptr = crear_nodo("OR", cond_mult_ptr, cond_ptr);
+            fprintf(or, "condicion_multiple_3\n");
       }
       ;
 
@@ -271,11 +309,13 @@ condicion:
       valores_admitidos_condicion comparador { comp_ptr->izq = val_adm_cond_ptr; } valores_admitidos_condicion {
             comp_ptr->der = val_adm_cond_ptr;
             cond_ptr = comp_ptr;
+            fprintf(or, "condicion_1\n");
       }
       | COND_OP_NOT {boolNegativeCondition = true;} valores_admitidos_condicion comparador { comp_ptr->izq = val_adm_cond_ptr; } valores_admitidos_condicion {
             comp_ptr->der = val_adm_cond_ptr;
             cond_ptr = comp_ptr;
             //cond_ptr = crear_nodo("NOT", comp_ptr, NULL);
+            fprintf(or, "condicion_2\n");
       };
       
 valores_admitidos_condicion:
@@ -633,7 +673,10 @@ binary_count_lista_aritmetica:
 
 int main(int argc, char *argv[])
 {
+      or = fopen("outputs/orden-reglas.txt", "wt");
+
       pila = crear_pila();
+      pila_cond = crear_pila();
 
       if((yyin = fopen(argv[1], "rt")) == NULL) {
             printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
@@ -645,6 +688,10 @@ int main(int argc, char *argv[])
       close_symbol_table();
       close_intermediate_code();
 	fclose(yyin);
+      fclose(or);
+
+      liberar_pila(pila);
+      liberar_pila(pila_cond);
 
       return 0;
 }
