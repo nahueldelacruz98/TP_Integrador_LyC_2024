@@ -41,6 +41,7 @@ struct Nodo *comp_ptr = NULL;
 struct Nodo *while_sent_ptr = NULL;
 struct Nodo *if_sent_ptr = NULL;
 struct Nodo *cond_op_ptr = NULL;
+struct Nodo *else_sent_ptr = NULL;
 
 struct Nodo *sent_arit_ptr = NULL;
 struct Nodo *expr_ptr = NULL;
@@ -161,7 +162,6 @@ codigo:
             printf("FIN de sentencia IF.\n\n");
             fprintf(or, "codigo_5\n");
       }
-      | LLAVE_C START_ELSE LLAVE_A {printf("\nInicio sentencia IF ELSE.\n\n"); }
       | escritura_sentence { codigo_ptr = escritura_ptr; }
       | lectura_sentence { codigo_ptr = lectura_ptr; }
       | get_penultimate_position
@@ -288,7 +288,20 @@ if_sentence:
             if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), NULL);
             fprintf(or, "if_sentence_2\n");
       }
+      | START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C else_sentence {
+            struct Nodo* cuerpo_nodo = NULL;
+            cuerpo_nodo = crear_nodo("-CUERPO IF/ELSE-", desapilar(pila_lin_cod), else_sent_ptr);
+            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), cuerpo_nodo);
+            fprintf(or, "if_sentence_3\n");
+            printf("Sentencia IF hace el siguiente codigo:\n\n");
+            mostrar_pila(pila_lin_cod);
+      }
       ;
+
+else_sentence:
+      START_ELSE LLAVE_A linea_codigo LLAVE_C {
+            else_sent_ptr = desapilar(pila_lin_cod);
+      }
 
 condicion_multiple:
       condicion {
@@ -309,15 +322,20 @@ condicion_multiple:
       ;
 
 condicion:
-      valores_admitidos_condicion comparador { comp_ptr->izq = val_adm_cond_ptr; } valores_admitidos_condicion {
+      valores_admitidos_condicion comparador {
+            comp_ptr->izq = val_adm_cond_ptr; 
+      } valores_admitidos_condicion {
             comp_ptr->der = val_adm_cond_ptr;
             cond_ptr = comp_ptr;
             fprintf(or, "condicion_1\n");
       }
-      | COND_OP_NOT {boolNegativeCondition = true;} valores_admitidos_condicion comparador { comp_ptr->izq = val_adm_cond_ptr; } valores_admitidos_condicion {
+      | COND_OP_NOT {
+            boolNegativeCondition = true;
+      } valores_admitidos_condicion comparador {
+            comp_ptr->izq = val_adm_cond_ptr;
+      } valores_admitidos_condicion {
             comp_ptr->der = val_adm_cond_ptr;
             cond_ptr = comp_ptr;
-            //cond_ptr = crear_nodo("NOT", comp_ptr, NULL);
             fprintf(or, "condicion_2\n");
       };
       
@@ -334,45 +352,73 @@ valores_admitidos_condicion:
 comparador:
       COMP_MAY {
             printf(" es mayor a ");
-            if(boolNegativeCondition) { comp_ptr = crear_hoja("<="); boolNegativeCondition = false;} else { comp_ptr = crear_hoja(">"); }
+            if(boolNegativeCondition) {
+                  comp_ptr = crear_hoja("<="); 
+                  boolNegativeCondition = false;
+            } else { 
+                  comp_ptr = crear_hoja(">"); 
+            }
       }
       | COMP_MEN {
             printf(" es menor a ");
-            if(boolNegativeCondition) { comp_ptr = crear_hoja(">="); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("<"); }
+            if(boolNegativeCondition) {
+                  comp_ptr = crear_hoja(">=");
+                  boolNegativeCondition = false;
+            } else {
+                  comp_ptr = crear_hoja("<");
+            }
       }
       | COMP_EQ {
             printf(" es igual a ");
-            if(boolNegativeCondition) { comp_ptr = crear_hoja("<>"); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("=="); }
+            if(boolNegativeCondition) {
+                  comp_ptr = crear_hoja("<>");
+                  boolNegativeCondition = false;
+            } else { 
+                  comp_ptr = crear_hoja("==");
+            }
       }
       | COMP_MAY_EQ {
             printf(" es mayor o igual a ");
-            if(boolNegativeCondition) { comp_ptr = crear_hoja("<"); boolNegativeCondition = false;} else { comp_ptr = crear_hoja(">="); }
+            if(boolNegativeCondition) {
+                  comp_ptr = crear_hoja("<");
+                  boolNegativeCondition = false;
+            } else { 
+                  comp_ptr = crear_hoja(">="); 
+            }
       }
       | COMP_MEN_EQ {
             printf(" es menor o igual a ");
-            if(boolNegativeCondition) { comp_ptr = crear_hoja(">"); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("<="); }
+            if(boolNegativeCondition) {
+                  comp_ptr = crear_hoja(">");
+                  boolNegativeCondition = false;
+            } else {
+                  comp_ptr = crear_hoja("<=");
+            }
       }
       | COMP_DIST {
             printf(" es distinto a ");
-            if(boolNegativeCondition) { comp_ptr = crear_hoja("=="); boolNegativeCondition = false;} else { comp_ptr = crear_hoja("<>"); }
+            if(boolNegativeCondition) {
+                  comp_ptr = crear_hoja("==");
+                  boolNegativeCondition = false;
+            } else {
+                  comp_ptr = crear_hoja("<>");
+            }
       };
 
 sentencia_aritmetica:
       ID OP_ARIT {
             pila_sent_aritmetica = crear_pila();
-            } expresion {     
+            } expresion {
             sent_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
-            //imprimirInorden(sent_arit_ptr);
-            //write_intermediate_code("\n");
       };
- 
+
 expresion:
       termino {
-            printf("    Termino es Expresion\n"); 
+            printf("    Termino es Expresion\n");
             expr_ptr = term_ptr;
       }
 	| expresion OP_SUM {
-            apilar(pila_sent_aritmetica,expr_ptr);
+            apilar(pila_sent_aritmetica, expr_ptr);
       } termino {
             printf("    Expresion+Termino es Expresion\n"); 
             expr_ptr = crear_nodo("+", desapilar(pila_sent_aritmetica), term_ptr);

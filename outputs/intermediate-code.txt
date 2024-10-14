@@ -1,1 +1,1 @@
- x < 434 AND x <= 1 OR x > 2 -WHILE- a =: 7 -LINEA CODIGO- j =: x + 32 -LINEA CODIGO- a =: b -LINEA CODIGO- x > 2 -IF- x =: 5 -LINEA CODIGO- y < 5 -WHILE- y =: 7
+ x > 4 -IF- x := 4 -CUERPO IF/ELSE- y := 0 -LINEA CODIGO- x := 0 -LINEA CODIGO- z := 5233 -LINEA CODIGO- x >= 53 AND x < 564 -IF- a := 54 -LINEA CODIGO- x > 23 -WHILE- x := 45 -CUERPO IF/ELSE- a := 444
