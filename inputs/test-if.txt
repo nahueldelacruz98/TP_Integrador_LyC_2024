@@ -1,4 +1,4 @@
-mientras(NOT x >= 434 AND NOT x > 1 OR x > 2) {
+si(NOT x >= 434 AND NOT x > 1 OR x > 2) {
     a =: 7
     j =: x + 32
     a =: b

@@ -1,1 +1,1 @@
- x =: y -LINEA CODIGO- a > 1 -IF- b =: 2 -LINEA CODIGO- c < 3 -IF- d =: 4 -LINEA CODIGO- e == 5 AND y == 565 AND z == 999 -IF- x =: 44444 -LINEA CODIGO- y =: 7 -LINEA CODIGO- e =: 88
+ x < 434 AND x <= 1 OR x > 2 -WHILE- a =: 7 -LINEA CODIGO- j =: x + 32 -LINEA CODIGO- a =: b -LINEA CODIGO- x > 2 -IF- x =: 5 -LINEA CODIGO- y < 5 -WHILE- y =: 7

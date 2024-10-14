@@ -21,7 +21,7 @@ int yylex();
 
 extern char* yytext;
 
-Pila *pila = NULL;
+Pila *pila_lin_cod = NULL;
 Pila *pila_cond = NULL;
 Pila *pila_sent_aritmetica = NULL;
 bool boolNegativeCondition = false;
@@ -125,14 +125,14 @@ start:
 linea_codigo:
       codigo {
             linea_cod_ptr = codigo_ptr;
-            apilar(pila, linea_cod_ptr);
-            mostrar_pila(pila);
+            apilar(pila_lin_cod, linea_cod_ptr);
+            mostrar_pila(pila_lin_cod);
             fprintf(or, "linea_codigo_1\n");
       }
       | linea_codigo codigo {
-            linea_cod_ptr = crear_nodo("-LINEA CODIGO-", desapilar(pila), codigo_ptr);
-            apilar(pila, linea_cod_ptr);
-            mostrar_pila(pila);
+            linea_cod_ptr = crear_nodo("-LINEA CODIGO-", desapilar(pila_lin_cod), codigo_ptr);
+            apilar(pila_lin_cod, linea_cod_ptr);
+            mostrar_pila(pila_lin_cod);
             fprintf(or, "linea_codigo_2\n");
       }
       ;
@@ -271,20 +271,21 @@ constante:
       ;
 
 while_sentence:
-      START_WHILE PAREN_A {printf("Sentencia WHILE hace el siguiente codigo:\n\n");} condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
-                  while_sent_ptr = crear_nodo("-WHILE-", cond_mult_ptr, linea_cod_ptr);
+      START_WHILE PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
+            while_sent_ptr = crear_nodo("-WHILE-", desapilar(pila_cond), desapilar(pila_lin_cod));
+            fprintf(or, "while_sentence_1\n");
       }
       ;
 
 if_sentence:
       START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
-            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), desapilar(pila));
+            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), desapilar(pila_lin_cod));
             fprintf(or, "if_sentence_1\n");
             printf("Sentencia IF hace el siguiente codigo:\n\n");
-            mostrar_pila(pila);
+            mostrar_pila(pila_lin_cod);
       }
       | START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A LLAVE_C {
-            if_sent_ptr = crear_nodo("-IF-", cond_mult_ptr, NULL);
+            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), NULL);
             fprintf(or, "if_sentence_2\n");
       }
       ;
@@ -677,7 +678,7 @@ int main(int argc, char *argv[])
 {
       or = fopen("outputs/orden-reglas.txt", "wt");
 
-      pila = crear_pila();
+      pila_lin_cod = crear_pila();
       pila_cond = crear_pila();
 
       if((yyin = fopen(argv[1], "rt")) == NULL) {
@@ -692,7 +693,7 @@ int main(int argc, char *argv[])
 	fclose(yyin);
       fclose(or);
 
-      liberar_pila(pila);
+      liberar_pila(pila_lin_cod);
       liberar_pila(pila_cond);
 
       return 0;

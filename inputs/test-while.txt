@@ -1,0 +1,11 @@
+mientras(NOT x >= 434 AND NOT x > 1 OR x > 2) {
+    a =: 7
+    j =: x + 32
+    a =: b
+    si(x > 2) {
+        x =: 5
+        mientras(y < 5){
+            y =: 7
+        }
+    }
+}
