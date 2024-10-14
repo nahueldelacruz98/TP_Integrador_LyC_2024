@@ -119,7 +119,7 @@ struct Nodo *escritura_ptr = NULL;
 
 start:
       linea_codigo {
-            imprimirInorden(linea_cod_ptr);
+            imprimirPostorden(linea_cod_ptr);
             generarArchivoDOT(linea_cod_ptr);
       }
 

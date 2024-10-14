@@ -1,1 +1,1 @@
- x > 4 -IF- x := 4 -CUERPO IF/ELSE- y := 0 -LINEA CODIGO- x := 0 -LINEA CODIGO- z := 5233 -LINEA CODIGO- x >= 53 AND x < 564 -IF- a := 54 -LINEA CODIGO- x > 23 -WHILE- x := 45 -CUERPO IF/ELSE- a := 444
+ x 4 > x 4 := y 0 := x 0 := -LINEA CODIGO- z 5233 := -LINEA CODIGO- x 53 >= x 564 < AND a 54 := x 23 > x 45 := -WHILE- -LINEA CODIGO- a 444 := -CUERPO IF/ELSE- -IF- -LINEA CODIGO- -CUERPO IF/ELSE- -IF-
