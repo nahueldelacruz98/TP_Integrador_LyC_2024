@@ -296,11 +296,13 @@ condicion_multiple:
             fprintf(or, "condicion_multiple_1\n");
       }
       | condicion_multiple COND_OP_AND condicion {
-            cond_mult_ptr = crear_nodo("AND", cond_mult_ptr, cond_ptr);
+            cond_mult_ptr = crear_nodo("AND", desapilar(pila_cond), cond_ptr);
+            apilar(pila_cond, cond_mult_ptr);
             fprintf(or, "condicion_multiple_2\n");
       }
       | condicion_multiple COND_OP_OR condicion {
-            cond_mult_ptr = crear_nodo("OR", cond_mult_ptr, cond_ptr);
+            cond_mult_ptr = crear_nodo("OR", desapilar(pila_cond), cond_ptr);
+            apilar(pila_cond, cond_mult_ptr);
             fprintf(or, "condicion_multiple_3\n");
       }
       ;
