@@ -10,13 +10,14 @@ struct Nodo {
 struct Nodo *crear_nodo(char *operador, struct Nodo *izq, struct Nodo *der);
 struct Nodo *crear_hoja(char *valor);
 
-void imprimirInorden(struct Nodo* nodo);
-void imprimirPreorden(struct Nodo* nodo);
-void imprimirPostorden(struct Nodo* nodo);
-void imprimirArbol(struct Nodo* nodo, int nivel);
+void imprimir_inorden(struct Nodo* nodo);
+void imprimir_preorden(struct Nodo* nodo);
+void imprimir_postorden(struct Nodo* nodo);
+void imprimir_arbol(struct Nodo* nodo, int nivel);
+void liberar_arbol(struct Nodo* nodo);
 
-void generarDOT(struct Nodo* nodo, FILE* archivo);
-void generarArchivoDOT(struct Nodo* raiz);
+void generar_DOT(struct Nodo* nodo, FILE* archivo);
+void generar_archivo_DOT(struct Nodo* raiz);
 
 struct Nodo *crear_nodo(char *operador, struct Nodo *izq, struct Nodo *der) {
     struct Nodo *nuevo = (struct Nodo *)malloc(sizeof(struct Nodo));
@@ -34,64 +35,105 @@ struct Nodo *crear_hoja(char *valor) {
     return hoja;
 }
 
-void imprimirInorden(struct Nodo* nodo) {
+void imprimir_inorden(struct Nodo* nodo) {
     if (nodo == NULL) return;
     
-    imprimirInorden(nodo->izq);
+    imprimir_inorden(nodo->izq);
     write_intermediate_code(nodo->valor);
     //printf("%s ", nodo->valor);
-    imprimirInorden(nodo->der);
+    imprimir_inorden(nodo->der);
 }
 
-void imprimirPreorden(struct Nodo* nodo) {
+void imprimir_preorden(struct Nodo* nodo) {
     if (nodo == NULL) return;
     
     //printf("%s ", nodo->valor);
     write_intermediate_code(nodo->valor);
-    imprimirPreorden(nodo->izq);
-    imprimirPreorden(nodo->der);
+    imprimir_preorden(nodo->izq);
+    imprimir_preorden(nodo->der);
 }
 
-void imprimirPostorden(struct Nodo* nodo) {
+void imprimir_postorden(struct Nodo* nodo) {
     if (nodo == NULL) return;
     
-    imprimirPostorden(nodo->izq);
-    imprimirPostorden(nodo->der);
+    imprimir_postorden(nodo->izq);
+    imprimir_postorden(nodo->der);
     //printf("%s ", nodo->valor);
     write_intermediate_code(nodo->valor);
 }
 
-void imprimirArbol(struct Nodo* nodo, int nivel) {
+void imprimir_arbol(struct Nodo* nodo, int nivel) {
     if (nodo == NULL) return;
 
-    imprimirArbol(nodo->der, nivel + 1);
+    imprimir_arbol(nodo->der, nivel + 1);
     
     for (int i = 0; i < nivel; i++) {
         printf("   ");
     }
     printf("%s\n", nodo->valor);
 
-    imprimirArbol(nodo->izq, nivel + 1);
+    imprimir_arbol(nodo->izq, nivel + 1);
 }
 
-void generarDOT(struct Nodo* nodo, FILE* archivo) {
+void liberar_arbol(struct Nodo* nodo) {
+    if (nodo == NULL) return;
+
+    liberar_arbol(nodo->izq);
+    liberar_arbol(nodo->der);
+    
+    free(nodo->valor); 
+    free(nodo);
+}
+
+char* escapar_DOT(const char* str) {
+    size_t len = strlen(str);
+    size_t new_len = len; // Almacenará la longitud del nuevo string
+
+    // Contar cuántos caracteres especiales hay
+    for (size_t i = 0; i < len; i++) {
+        if (str[i] == '"' || str[i] == '\\' || str[i] == '{' || str[i] == '}' || str[i] == '[' || str[i] == ']' || str[i] == '\n') {
+            new_len++; // Aumentar el tamaño para el carácter de escape
+        }
+    }
+
+    char* nuevo_str = (char*)malloc(new_len + 1); // +1 para el terminador nulo
+    if (nuevo_str == NULL) {
+        perror("No se pudo alocar memoria");
+        exit(1);
+    }
+
+    size_t j = 0;
+    for (size_t i = 0; i < len; i++) {
+        if (str[i] == '"' || str[i] == '\\' || str[i] == '{' || str[i] == '}' || str[i] == '[' || str[i] == ']' || str[i] == '\n') {
+            nuevo_str[j++] = '\\'; // Agregar el carácter de escape
+        }
+        nuevo_str[j++] = str[i]; // Agregar el carácter original
+    }
+
+    nuevo_str[j] = '\0'; // Terminador nulo
+    return nuevo_str;
+}
+
+void generar_DOT(struct Nodo* nodo, FILE* archivo) {
     if (nodo == NULL)
         return;
 
-    fprintf(archivo, "    \"%p\" [label=\"%s\"];\n", (void*)nodo, nodo->valor);
+    char* valor_escapado = escapar_DOT(nodo->valor);
+    fprintf(archivo, "    \"%p\" [label=\"%s\"];\n", (void*)nodo, valor_escapado);
+    free(valor_escapado);
 
     if (nodo->izq != NULL) {
         fprintf(archivo, "    \"%p\" -> \"%p\";\n", (void*)nodo, (void*)nodo->izq);
-        generarDOT(nodo->izq, archivo);
+        generar_DOT(nodo->izq, archivo);
     }
 
     if (nodo->der != NULL) {
         fprintf(archivo, "    \"%p\" -> \"%p\";\n", (void*)nodo, (void*)nodo->der);
-        generarDOT(nodo->der, archivo);
+        generar_DOT(nodo->der, archivo);
     }
 }
 
-void generarArchivoDOT(struct Nodo* raiz) {
+void generar_archivo_DOT(struct Nodo* raiz) {
     FILE* archivo = fopen(NAME_DOT_FILE, "w");
     if (archivo == NULL) {
         printf("Error al abrir el archivo %s\n", NAME_DOT_FILE);
@@ -102,7 +144,7 @@ void generarArchivoDOT(struct Nodo* raiz) {
     fprintf(archivo, "    node [fontname=\"Arial\"];\n");
 
     if (raiz != NULL) {
-        generarDOT(raiz, archivo);
+        generar_DOT(raiz, archivo);
     }
 
     fprintf(archivo, "}\n");

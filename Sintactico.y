@@ -21,29 +21,28 @@ int yylex();
 
 extern char* yytext;
 
-Pila *pila_lin_cod = NULL;
-Pila *pila_cond = NULL;
-Pila *pila_sent_aritmetica = NULL;
+Pila *pila_bloq_cod = NULL;
+Pila *pila_cond_mult = NULL;
+Pila *pila_arit = NULL;
 bool boolNegativeCondition = false;
 
 char* aux = NULL;
 char* res = NULL;
 
-struct Nodo *linea_cod_ptr = NULL;
-struct Nodo *codigo_ptr = NULL;
-struct Nodo *init_var = NULL;
+struct Nodo *bloq_cod_ptr = NULL;
+struct Nodo *sent_ptr = NULL;
+struct Nodo *inic_var_ptr = NULL;
 struct Nodo *asig_var_ptr = NULL;
 struct Nodo *const_ptr = NULL;
 struct Nodo *cond_mult_ptr = NULL;
 struct Nodo *cond_ptr = NULL;
 struct Nodo *val_adm_cond_ptr = NULL;
 struct Nodo *comp_ptr = NULL;
-struct Nodo *while_sent_ptr = NULL;
-struct Nodo *if_sent_ptr = NULL;
+struct Nodo *while_ptr = NULL;
+struct Nodo *if_ptr = NULL;
 struct Nodo *cond_op_ptr = NULL;
 struct Nodo *else_sent_ptr = NULL;
-
-struct Nodo *sent_arit_ptr = NULL;
+struct Nodo *arit_ptr = NULL;
 struct Nodo *expr_ptr = NULL;
 struct Nodo *term_ptr = NULL;
 struct Nodo *fact_ptr = NULL;
@@ -53,13 +52,13 @@ struct Nodo *decl_ptr = NULL;
 struct Nodo *conj_var_ptr = NULL;
 struct Nodo *tipo_var_ptr = NULL;
 struct Nodo *get_pen_pos_ptr = NULL;
-struct Nodo *vec_num_ptr = NULL;
-struct Nodo *list_arit_ptr = NULL;
+struct Nodo *gpp_vec_num_ptr = NULL;
+struct Nodo *gpp_list_arit_ptr = NULL;
 struct Nodo *bin_count_ptr = NULL;
-struct Nodo *bin_count_vec_num_ptr = NULL;
-struct Nodo *bin_count_list_arit_ptr = NULL;
-struct Nodo *lectura_ptr = NULL;
-struct Nodo *escritura_ptr = NULL;
+struct Nodo *bc_vec_num_ptr = NULL;
+struct Nodo *bc_list_arit_ptr = NULL;
+struct Nodo *lect_ptr = NULL;
+struct Nodo *escr_ptr = NULL;
 
 %}
 
@@ -118,60 +117,69 @@ struct Nodo *escritura_ptr = NULL;
 %%
 
 start:
-      linea_codigo {
-            imprimirPostorden(linea_cod_ptr);
-            generarArchivoDOT(linea_cod_ptr);
+      bloque_cod1go {
+            imprimir_postorden(bloq_cod_ptr);
+            generar_archivo_DOT(bloq_cod_ptr);
+            liberar_arbol(bloq_cod_ptr);
       }
 
-linea_codigo:
-      codigo {
-            linea_cod_ptr = codigo_ptr;
-            apilar(pila_lin_cod, linea_cod_ptr);
-            mostrar_pila(pila_lin_cod);
-            fprintf(or, "linea_codigo_1\n");
+bloque_cod1go:
+      sentencia {
+            bloq_cod_ptr = sent_ptr;
+            apilar(pila_bloq_cod, bloq_cod_ptr);
+            mostrar_pila(pila_bloq_cod);
+            fprintf(or, "bloque_cod1go_1\n");
       }
-      | linea_codigo codigo {
-            linea_cod_ptr = crear_nodo("-LINEA CODIGO-", desapilar(pila_lin_cod), codigo_ptr);
-            apilar(pila_lin_cod, linea_cod_ptr);
-            mostrar_pila(pila_lin_cod);
-            fprintf(or, "linea_codigo_2\n");
+      | bloque_cod1go sentencia {
+            bloq_cod_ptr = crear_nodo("-SENTENCIA-", desapilar(pila_bloq_cod), sent_ptr);
+            apilar(pila_bloq_cod, bloq_cod_ptr);
+            mostrar_pila(pila_bloq_cod);
+            fprintf(or, "bloque_cod1go_2\n");
       }
       ;
 
-codigo:
+sentencia:
       inicializacion_variables {
-            codigo_ptr = init_var;
-            fprintf(or, "codigo_1\n");
+            sent_ptr = inic_var_ptr;
+            fprintf(or, "sentencia_1\n");
       }
       | asignacion_variables {
-            codigo_ptr = asig_var_ptr; 
+            sent_ptr = asig_var_ptr; 
             printf("\n");
-            fprintf(or, "codigo_2\n");
+            fprintf(or, "sentencia_2\n");
       }
-      | sentencia_aritmetica {
-            codigo_ptr = sent_arit_ptr;
-            fprintf(or, "codigo_3\n");
+      | aritmetica {
+            sent_ptr = arit_ptr;
+            fprintf(or, "sentencia_3\n");
       }
-      | while_sentence {
-            codigo_ptr = while_sent_ptr; 
+      | while {
+            sent_ptr = while_ptr; 
+            fprintf(or, "sentencia_4\n");
             printf("FIN de ciclo WHILE.\n\n");
-            fprintf(or, "codigo_4\n");
       }
-      | if_sentence {
-            codigo_ptr = if_sent_ptr;
+      | if {
+            sent_ptr = if_ptr;
+            fprintf(or, "sentencia_5\n");
             printf("FIN de sentencia IF.\n\n");
-            fprintf(or, "codigo_5\n");
       }
-      | escritura_sentence { codigo_ptr = escritura_ptr; }
-      | lectura_sentence { codigo_ptr = lectura_ptr; }
-      | get_penultimate_position
-      | binary_count
+      | escritura {
+            sent_ptr = escr_ptr;
+      }
+      | lectura {
+            sent_ptr = lect_ptr;
+      }
+      | get_penultimate_position {
+            sent_ptr = get_pen_pos_ptr;
+      }
+      | binary_count {
+            sent_ptr = bin_count_ptr;
+      }
       ;
 
 inicializacion_variables:
       INIT_VAR LLAVE_A declaracion LLAVE_C {
             printf("FIN de declaracion de variables.\n\n");
-            init_var = crear_nodo("init", NULL, decl_ptr);
+            inic_var_ptr = crear_nodo("init", NULL, decl_ptr);
       }
       ;
 
@@ -199,7 +207,7 @@ conjunto_variables:
             Simbolo simbolo = {"", "", "-", 0};
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
-            printf("%s",yytext);
+            printf("%s", yytext);
 
             conj_var_ptr = crear_hoja($1);
       }
@@ -270,53 +278,53 @@ constante:
       }
       ;
 
-while_sentence:
-      START_WHILE PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
-            while_sent_ptr = crear_nodo("-WHILE-", desapilar(pila_cond), desapilar(pila_lin_cod));
-            fprintf(or, "while_sentence_1\n");
+while:
+      START_WHILE PAREN_A condicion_multiple PAREN_C LLAVE_A bloque_cod1go LLAVE_C {
+            while_ptr = crear_nodo("-WHILE-", desapilar(pila_cond_mult), desapilar(pila_bloq_cod));
+            fprintf(or, "while_1\n");
       }
       ;
 
-if_sentence:
-      START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C {
-            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), desapilar(pila_lin_cod));
-            fprintf(or, "if_sentence_1\n");
+if:
+      START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A bloque_cod1go LLAVE_C {
+            if_ptr = crear_nodo("-IF-", desapilar(pila_cond_mult), desapilar(pila_bloq_cod));
+            fprintf(or, "if_1\n");
             printf("Sentencia IF hace el siguiente codigo:\n\n");
-            mostrar_pila(pila_lin_cod);
+            mostrar_pila(pila_bloq_cod);
       }
       | START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A LLAVE_C {
-            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), NULL);
-            fprintf(or, "if_sentence_2\n");
+            if_ptr = crear_nodo("-IF-", desapilar(pila_cond_mult), NULL);
+            fprintf(or, "if_2\n");
       }
-      | START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A linea_codigo LLAVE_C else_sentence {
+      | START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A bloque_cod1go LLAVE_C else {
             struct Nodo* cuerpo_nodo = NULL;
-            cuerpo_nodo = crear_nodo("-CUERPO IF/ELSE-", desapilar(pila_lin_cod), else_sent_ptr);
-            if_sent_ptr = crear_nodo("-IF-", desapilar(pila_cond), cuerpo_nodo);
-            fprintf(or, "if_sentence_3\n");
+            cuerpo_nodo = crear_nodo("-CUERPO IF/ELSE-", desapilar(pila_bloq_cod), else_sent_ptr);
+            if_ptr = crear_nodo("-IF-", desapilar(pila_cond_mult), cuerpo_nodo);
+            fprintf(or, "if_3\n");
             printf("Sentencia IF hace el siguiente codigo:\n\n");
-            mostrar_pila(pila_lin_cod);
+            mostrar_pila(pila_bloq_cod);
       }
       ;
 
-else_sentence:
-      START_ELSE LLAVE_A linea_codigo LLAVE_C {
-            else_sent_ptr = desapilar(pila_lin_cod);
+else:
+      START_ELSE LLAVE_A bloque_cod1go LLAVE_C {
+            else_sent_ptr = desapilar(pila_bloq_cod);
       }
 
 condicion_multiple:
       condicion {
             cond_mult_ptr = cond_ptr;
-            apilar(pila_cond, cond_mult_ptr);
+            apilar(pila_cond_mult, cond_mult_ptr);
             fprintf(or, "condicion_multiple_1\n");
       }
       | condicion_multiple COND_OP_AND condicion {
-            cond_mult_ptr = crear_nodo("AND", desapilar(pila_cond), cond_ptr);
-            apilar(pila_cond, cond_mult_ptr);
+            cond_mult_ptr = crear_nodo("AND", desapilar(pila_cond_mult), cond_ptr);
+            apilar(pila_cond_mult, cond_mult_ptr);
             fprintf(or, "condicion_multiple_2\n");
       }
       | condicion_multiple COND_OP_OR condicion {
-            cond_mult_ptr = crear_nodo("OR", desapilar(pila_cond), cond_ptr);
-            apilar(pila_cond, cond_mult_ptr);
+            cond_mult_ptr = crear_nodo("OR", desapilar(pila_cond_mult), cond_ptr);
+            apilar(pila_cond_mult, cond_mult_ptr);
             fprintf(or, "condicion_multiple_3\n");
       }
       ;
@@ -351,108 +359,112 @@ valores_admitidos_condicion:
 
 comparador:
       COMP_MAY {
-            printf(" es mayor a ");
             if(boolNegativeCondition) {
                   comp_ptr = crear_hoja("<="); 
                   boolNegativeCondition = false;
             } else { 
                   comp_ptr = crear_hoja(">"); 
             }
+            printf(" es mayor a ");
       }
       | COMP_MEN {
-            printf(" es menor a ");
             if(boolNegativeCondition) {
                   comp_ptr = crear_hoja(">=");
                   boolNegativeCondition = false;
             } else {
                   comp_ptr = crear_hoja("<");
             }
+            printf(" es menor a ");
       }
       | COMP_EQ {
-            printf(" es igual a ");
             if(boolNegativeCondition) {
                   comp_ptr = crear_hoja("<>");
                   boolNegativeCondition = false;
             } else { 
                   comp_ptr = crear_hoja("==");
             }
+            printf(" es igual a ");
       }
       | COMP_MAY_EQ {
-            printf(" es mayor o igual a ");
             if(boolNegativeCondition) {
                   comp_ptr = crear_hoja("<");
                   boolNegativeCondition = false;
             } else { 
                   comp_ptr = crear_hoja(">="); 
             }
+            printf(" es mayor o igual a ");
       }
       | COMP_MEN_EQ {
-            printf(" es menor o igual a ");
             if(boolNegativeCondition) {
                   comp_ptr = crear_hoja(">");
                   boolNegativeCondition = false;
             } else {
                   comp_ptr = crear_hoja("<=");
             }
+            printf(" es menor o igual a ");
       }
       | COMP_DIST {
-            printf(" es distinto a ");
             if(boolNegativeCondition) {
                   comp_ptr = crear_hoja("==");
                   boolNegativeCondition = false;
             } else {
                   comp_ptr = crear_hoja("<>");
             }
+            printf(" es distinto a ");
       };
 
-sentencia_aritmetica:
+aritmetica:
       ID OP_ARIT {
-            pila_sent_aritmetica = crear_pila();
-            } expresion {
-            sent_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
+            pila_arit = crear_pila();
+      } expresion {
+            arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
       };
 
 expresion:
       termino {
-            printf("    Termino es Expresion\n");
             expr_ptr = term_ptr;
+            printf("    Termino es Expresion\n");
       }
 	| expresion OP_SUM {
-            apilar(pila_sent_aritmetica, expr_ptr);
+            apilar(pila_arit, expr_ptr);
       } termino {
+            expr_ptr = crear_nodo("+", desapilar(pila_arit), term_ptr);
             printf("    Expresion+Termino es Expresion\n"); 
-            expr_ptr = crear_nodo("+", desapilar(pila_sent_aritmetica), term_ptr);
       }
 	| expresion OP_RES {
-            apilar(pila_sent_aritmetica,expr_ptr);
+            apilar(pila_arit, expr_ptr);
       } termino {
+            expr_ptr = crear_nodo("-", desapilar(pila_arit), term_ptr);
             printf("    Expresion-Termino es Expresion\n"); 
-            expr_ptr = crear_nodo("-", desapilar(pila_sent_aritmetica), term_ptr);
       };
  
 termino: 
-      factor {printf("    Factor es Termino\n"); term_ptr = fact_ptr;}
+      factor {
+            printf("    Factor es Termino\n");
+            term_ptr = fact_ptr;
+      }
       | termino OP_MUL {
-            apilar(pila_sent_aritmetica,term_ptr);
-            } factor {
-                  printf("     Termino*Factor es Termino\n"); 
-                  term_ptr = crear_nodo("*", desapilar(pila_sent_aritmetica), fact_ptr);
-            }
+            apilar(pila_arit, term_ptr);
+      } factor {
+            term_ptr = crear_nodo("*", desapilar(pila_arit), fact_ptr);
+            printf("     Termino*Factor es Termino\n"); 
+      }
       | termino OP_DIV {
-            apilar(pila_sent_aritmetica,term_ptr);
-            } factor {
-                  printf("     Termino/Factor es Termino\n"); 
-                  term_ptr = crear_nodo("/", desapilar(pila_sent_aritmetica), fact_ptr);
-            };
+            apilar(pila_arit, term_ptr);
+      } factor {
+            term_ptr = crear_nodo("/", desapilar(pila_arit), fact_ptr);
+            printf("     Termino/Factor es Termino\n"); 
+      }
+      ;
  
 factor: 
       variable_aritmetica {
-            printf("    %s es Factor\n", yytext); 
             fact_ptr = var_arit_ptr;
+            printf("    %s es Factor\n", yytext); 
       }
 	| PAREN_A expresion PAREN_C {
-            printf("    Expresion entre parentesis es Factor\n"); 
             fact_ptr = expr_ptr;
+            printf("    Expresion entre parentesis es Factor\n"); 
       }
      	;
 
@@ -468,34 +480,37 @@ variable_aritmetica:
       }
       ;
 
-lectura_sentence:
+lectura:
       START_LECTURA PAREN_A ID PAREN_C {
-            lectura_ptr = crear_nodo("->",crear_hoja("READ"), crear_hoja($3));
+            lect_ptr = crear_nodo("->", crear_hoja("READ"), crear_hoja($3));
             printf("Comienzo de lectura. Guardar resultado en ID.\n");}
       ;
 
-escritura_sentence:
-      START_ESCRITURA PAREN_A CONST_STRING PAREN_C  {escritura_ptr = crear_nodo("<-",crear_hoja("WRITE"), crear_hoja($3)); printf("Comienzo de escritura de constante STRING.\n");}
-      | START_ESCRITURA PAREN_A ID PAREN_C {escritura_ptr = crear_nodo("<-",crear_hoja("WRITE"), crear_hoja($3)); printf("Comienzo de escritura de valor de ID.\n");}
-      ;
-
-get_penultimate_position:
-      FUNCT_GPP PAREN_A vector_numerico PAREN_C {
-            printf("\nEjecutando get_penultimate_position\n");
-
-            get_pen_pos_ptr = crear_nodo("get_penultimate_position", crear_hoja("@res"), vec_num_ptr);
-            imprimirInorden(get_pen_pos_ptr);
-            write_intermediate_code("\n");
-      };
-
-vector_numerico:
-      CORCH_A lista_aritmetica CORCH_C {
-            printf("\nVector numerico\n");
-            vec_num_ptr = list_arit_ptr;
+escritura:
+      START_ESCRITURA PAREN_A CONST_STRING PAREN_C  {
+            escr_ptr = crear_nodo("<-", crear_hoja("WRITE"), crear_hoja($3));
+            printf("Comienzo de escritura de constante STRING.\n");
+      }
+      | START_ESCRITURA PAREN_A ID PAREN_C {
+            escr_ptr = crear_nodo("<-", crear_hoja("WRITE"), crear_hoja($3));
+            printf("Comienzo de escritura de valor de ID.\n");
       }
       ;
 
-lista_aritmetica:
+get_penultimate_position:
+      FUNCT_GPP PAREN_A gpp_vector_numerico PAREN_C {
+            get_pen_pos_ptr = crear_nodo("get_penultimate_position", crear_hoja("@res"), gpp_vec_num_ptr);
+            printf("\nEjecutando get_penultimate_position\n");
+      };
+
+gpp_vector_numerico:
+      CORCH_A gpp_lista_aritmetica CORCH_C {
+            gpp_vec_num_ptr = gpp_list_arit_ptr;
+            printf("\nVector numerico\n");
+      }
+      ;
+
+gpp_lista_aritmetica:
       variable_aritmetica {
             struct Nodo* aux_hoja;
             struct Nodo* yytext_hoja;
@@ -512,13 +527,14 @@ lista_aritmetica:
 
             //res = NULL;
             res_hoja = crear_hoja("@res");
-            res_nodo = crear_nodo(":=", res_hoja, NULL);
+            res_nodo = crear_nodo(":=", res_hoja, crear_hoja("NULL"));
 
-            //list_arit_ptr = var_arit_ptr;
+            //gpp_list_arit_ptr = var_arit_ptr;
             cuerpo_nodo = crear_nodo("-CUERPO-", aux_nodo, res_nodo);
-            list_arit_ptr = cuerpo_nodo;
+
+            gpp_list_arit_ptr = cuerpo_nodo;
       }
-      | lista_aritmetica COMA variable_aritmetica {
+      | gpp_lista_aritmetica COMA variable_aritmetica {
             struct Nodo* aux_hoja;
             struct Nodo* yytext_hoja;
             struct Nodo* res_hoja;
@@ -540,55 +556,51 @@ lista_aritmetica:
 
             cuerpo_nodo = crear_nodo("-CUERPO-", res_nodo, aux2_nodo);
 
-            list_arit_ptr = crear_nodo(",", list_arit_ptr, cuerpo_nodo);
+            gpp_list_arit_ptr = crear_nodo(",", gpp_list_arit_ptr, cuerpo_nodo);
       }
       ;
 
 binary_count:
-      FUNCT_BC PAREN_A binary_count_vector_numerico PAREN_C {
+      FUNCT_BC PAREN_A bc_vector_numerico PAREN_C {
+            bin_count_ptr = crear_nodo("binary_count", crear_hoja("@count"), bc_vec_num_ptr);
             printf("\nEjecutando binary_count \n");
-
-            bin_count_ptr = crear_nodo("binary_count", crear_hoja("@count"), bin_count_vec_num_ptr);
-            imprimirInorden(bin_count_ptr);
-            write_intermediate_code("\n");
       }
       ;
 
-binary_count_vector_numerico:
-      CORCH_A binary_count_lista_aritmetica CORCH_C {
+bc_vector_numerico:
+      CORCH_A bc_lista_aritmetica CORCH_C {
+            bc_vec_num_ptr = bc_list_arit_ptr;
             printf("\nVector numerico\n");
-            bin_count_vec_num_ptr = bin_count_list_arit_ptr;
       }
       ;
 
-binary_count_lista_aritmetica:
+bc_lista_aritmetica:
       variable_aritmetica {
+            struct Nodo* asig_nodo = NULL;
+            struct Nodo* res_nodo = NULL;
+            struct Nodo* aux_nodo = NULL;
+            struct Nodo* aux2_nodo = NULL;
+            struct Nodo* flag_nodo = NULL;
+            struct Nodo* condwhile_nodo = NULL;
+            struct Nodo* condif1_nodo = NULL;
+            struct Nodo* condif2_nodo = NULL;
+            struct Nodo* condif3_nodo = NULL;
+            struct Nodo* if_nodo = NULL;
+            struct Nodo* cuerpo_res_nodo = NULL;
+            struct Nodo* cuerpo_if_nodo = NULL;
+            struct Nodo* cuerpo_asig_nodo = NULL;
+            struct Nodo* cuerpo_while_nodo = NULL;
+            struct Nodo* cuerpo_flag_nodo = NULL;
+            struct Nodo* flag_0_nodo = NULL;
+            struct Nodo* if_flag_nodo = NULL;
+            struct Nodo* cond_if_flag_nodo = NULL;
+            struct Nodo* cuerpo_if_flag_nodo = NULL;
+            struct Nodo* count_nodo = NULL;
+            
             struct Nodo* auxiliar_nodo;
-            //bin_count_list_arit_ptr = var_arit_ptr;
+            //bc_list_arit_ptr = var_arit_ptr;
             //count = 0;
-
             auxiliar_nodo = crear_nodo(":=", crear_hoja("@count"), crear_hoja("0"));
-
-            struct Nodo* asig_nodo = NULL;
-            struct Nodo* res_nodo = NULL;
-            struct Nodo* aux_nodo = NULL;
-            struct Nodo* aux2_nodo = NULL;
-            struct Nodo* flag_nodo = NULL;
-            struct Nodo* condwhile_nodo = NULL;
-            struct Nodo* condif1_nodo = NULL;
-            struct Nodo* condif2_nodo = NULL;
-            struct Nodo* condif3_nodo = NULL;
-            struct Nodo* if_nodo = NULL;
-            struct Nodo* cuerpo_res_nodo = NULL;
-            struct Nodo* cuerpo_if_nodo = NULL;
-            struct Nodo* cuerpo_asig_nodo = NULL;
-            struct Nodo* cuerpo_while_nodo = NULL;
-            struct Nodo* cuerpo_flag_nodo = NULL;
-            struct Nodo* flag_0_nodo = NULL;
-            struct Nodo* if_flag_nodo = NULL;
-            struct Nodo* cond_if_flag_nodo = NULL;
-            struct Nodo* cuerpo_if_flag_nodo = NULL;
-            struct Nodo* count_nodo = NULL;
             
             //aux = yytext;
             asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
@@ -639,11 +651,11 @@ binary_count_lista_aritmetica:
             cuerpo_flag_nodo = crear_nodo("-CUERPO-", flag_nodo, cuerpo_while_nodo);
             cuerpo_asig_nodo = crear_nodo("-CUERPO-", asig_nodo, cuerpo_flag_nodo);
 
-            bin_count_list_arit_ptr = cuerpo_asig_nodo;
+            bc_list_arit_ptr = cuerpo_asig_nodo;
             
-            bin_count_list_arit_ptr = crear_nodo("-CUERPO-", auxiliar_nodo, bin_count_list_arit_ptr);
+            bc_list_arit_ptr = crear_nodo("-CUERPO-", auxiliar_nodo, bc_list_arit_ptr);
       }
-      | binary_count_lista_aritmetica COMA variable_aritmetica {
+      | bc_lista_aritmetica COMA variable_aritmetica {
             struct Nodo* asig_nodo = NULL;
             struct Nodo* res_nodo = NULL;
             struct Nodo* aux_nodo = NULL;
@@ -714,7 +726,7 @@ binary_count_lista_aritmetica:
             cuerpo_flag_nodo = crear_nodo("-CUERPO-", flag_nodo, cuerpo_while_nodo);
             cuerpo_asig_nodo = crear_nodo("-CUERPO-", asig_nodo, cuerpo_flag_nodo);
 
-            bin_count_list_arit_ptr = crear_nodo(",", bin_count_list_arit_ptr, cuerpo_asig_nodo);
+            bc_list_arit_ptr = crear_nodo(",", bc_list_arit_ptr, cuerpo_asig_nodo);
       }
       ;
 
@@ -723,24 +735,23 @@ binary_count_lista_aritmetica:
 int main(int argc, char *argv[])
 {
       or = fopen("outputs/orden-reglas.txt", "wt");
-
-      pila_lin_cod = crear_pila();
-      pila_cond = crear_pila();
-
+      pila_bloq_cod = crear_pila();
+      pila_cond_mult = crear_pila();
       if((yyin = fopen(argv[1], "rt")) == NULL) {
             printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
             return 1;
       }
       open_symbol_table();
+
       create_intermediate_code();
       yyparse();
+
       close_symbol_table();
       close_intermediate_code();
 	fclose(yyin);
       fclose(or);
-
-      liberar_pila(pila_lin_cod);
-      liberar_pila(pila_cond);
+      liberar_pila(pila_bloq_cod);
+      liberar_pila(pila_cond_mult);
 
       return 0;
 }
