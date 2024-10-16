@@ -1,20 +1,20 @@
 x = getPenultimatePosition([3, 8.2, 2, 55.5]) // x = 2
 {
-    apilo($)
-    return (desapilo desapilo)
-    //pp = len(list) - 1;
-    //return list[pp]
+    aux = 3;
+    res = NULL; -> primera iteracion
+    res = aux -> a partir de la segunda iteracion
+    return res;
 }
 
 
 x = 3 // asignaciones a fines de entender los ejemplos
 y = binaryCount([110,1,0,5,x,10101100,-1])  // y = 4
 {
-    count = 0;
+    count = 0; -> primera iteracion
     flag = 1;
     int aux = 110;
-    while (num > 0) {
-        int res = num % 10;
+    while (aux > 0) {
+        int res = aux % 10;
         if (res != 0 | res != 1) {
             flag = 0;
         }

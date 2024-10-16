@@ -517,21 +517,21 @@ variable_aritmetica:
 lectura:
       START_LECTURA PAREN_A ID PAREN_C {
             lect_ptr = crear_nodo("-LECTURA-", crear_hoja("read"), crear_hoja($3));
-            printf("Comienzo de lectura. Guardar resultado en ID.\n");
             fprintf(orden_reglas, "lectura_1\n");
+            printf("Comienzo de lectura. Guardar resultado en ID.\n");
       }
       ;
 
 escritura:
       START_ESCRITURA PAREN_A CONST_STRING PAREN_C  {
             escr_ptr = crear_nodo("-ESCRITURA-", crear_hoja("write"), crear_hoja($3));
-            printf("Comienzo de escritura de constante STRING.\n");
             fprintf(orden_reglas, "escritura_1\n");
+            printf("Comienzo de escritura de constante STRING.\n");
       }
       | START_ESCRITURA PAREN_A ID PAREN_C {
             escr_ptr = crear_nodo("-ESCRITURA-", crear_hoja("write"), crear_hoja($3));
-            printf("Comienzo de escritura de valor de ID.\n");
             fprintf(orden_reglas, "escritura_2\n");
+            printf("Comienzo de escritura de valor de ID.\n");
       }
       ;
 
