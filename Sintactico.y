@@ -286,6 +286,7 @@ while:
       }
       ;
 
+
 if:
       START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A bloque_cod1go LLAVE_C {
             if_ptr = crear_nodo("-IF-", desapilar(pila_cond_mult), desapilar(pila_bloq_cod));
@@ -350,7 +351,8 @@ condicion:
             comp_ptr->der = val_adm_cond_ptr;
             cond_ptr = comp_ptr;
             fprintf(orden_reglas, "condicion_2\n");
-      };
+      }
+      ;
       
 valores_admitidos_condicion:
       ID {
@@ -362,7 +364,8 @@ valores_admitidos_condicion:
             val_adm_cond_ptr = const_ptr;
             fprintf(orden_reglas, "valores_admitidos_condicion_2\n");
             printf("CONSTANTE");
-      };
+      }
+      ;
 
 comparador:
       COMP_MAY {
@@ -424,13 +427,15 @@ comparador:
             }
             fprintf(orden_reglas, "comparador_6\n");
             printf(" es distinto a ");
-      };
+      }
+      ;
 
 asignacion_aritmetica:
       ID OP_ARIT expresion {
             asig_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
             fprintf(orden_reglas, "asignacion_aritmetica_1\n");
-      };
+      }
+      ;
 
 expresion:
       termino {
@@ -451,7 +456,8 @@ expresion:
             expr_ptr = crear_nodo("-", desapilar(pila_asig_arit), term_ptr);
             fprintf(orden_reglas, "expresion_3\n");
             printf("    Expresion-Termino es Expresion\n"); 
-      };
+      }
+      ;
  
 termino: 
       factor {
@@ -529,7 +535,8 @@ get_penultimate_position:
             get_pen_pos_ptr = crear_nodo("-GET_PENULTIMATE_POSITION-", gpp_vec_num_ptr, NULL);
             fprintf(orden_reglas, "get_penultimate_position_1\n");
             printf("\nEjecutando get_penultimate_position\n");
-      };
+      }
+      ;
 
 gpp_vector_numerico:
       CORCH_A gpp_lista_aritmetica CORCH_C {
