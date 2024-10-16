@@ -136,7 +136,6 @@ bloque_cod1go:
 
 sentencia:
       inicializacion_variables {
-            sent_ptr = inic_var_ptr;
             fprintf(orden_reglas, "sentencia_1\n");
       }
       | asignacion_variables {
@@ -178,7 +177,6 @@ sentencia:
 
 inicializacion_variables:
       INIT_VAR LLAVE_A declaracion LLAVE_C {
-            inic_var_ptr = crear_nodo("-INIT-", NULL, decl_ptr);
             fprintf(orden_reglas, "inicializacion_variables_1\n");
             printf("FIN de declaracion de variables.\n\n");
       }
@@ -186,13 +184,9 @@ inicializacion_variables:
 
 declaracion:
       conjunto_variables DOS_PUNTOS tipo_variables {
-            decl_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
             fprintf(orden_reglas, "declaracion_1\n");
       }
       | declaracion conjunto_variables DOS_PUNTOS tipo_variables {
-            struct Nodo* aux_ptr;
-            aux_ptr = crear_nodo(":", conj_var_ptr, tipo_var_ptr);
-            decl_ptr = crear_nodo("-DECLARACION-", aux_ptr, decl_ptr);
             fprintf(orden_reglas, "declaracion_2\n");
       }
 	;
@@ -203,7 +197,6 @@ conjunto_variables:
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
             
-            conj_var_ptr = crear_nodo(",", conj_var_ptr, crear_hoja($3));
             fprintf(orden_reglas, "conjunto_variables_1\n");
             printf(",%s",yytext);
       }
@@ -212,7 +205,6 @@ conjunto_variables:
             strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
             write_symbol_table(simbolo);
 
-            conj_var_ptr = crear_hoja($1);
             fprintf(orden_reglas, "conjunto_variables_2\n");
             printf("%s", yytext);
       }
@@ -220,17 +212,14 @@ conjunto_variables:
          
 tipo_variables:
       DECL_STRING {
-            tipo_var_ptr = crear_hoja("String");
             fprintf(orden_reglas, "tipo_variables_1\n");
             printf(": variable/s de tipo String.\n"); 
       }
       | DECL_FLOAT {
-            tipo_var_ptr = crear_hoja("Float");
             fprintf(orden_reglas, "tipo_variables_2\n");
             printf(": variable/s de tipo Float.\n"); 
       }
       | DECL_INT {
-            tipo_var_ptr = crear_hoja("Int");
             fprintf(orden_reglas, "tipo_variables_3\n");
             printf(": variable/s de tipo Integer.\n"); 
       }
@@ -537,7 +526,7 @@ escritura:
 
 get_penultimate_position:
       FUNCT_GPP PAREN_A gpp_vector_numerico PAREN_C {
-            get_pen_pos_ptr = crear_nodo("-GET_PENULTIMATE_POSITION-", crear_hoja("@res"), gpp_vec_num_ptr);
+            get_pen_pos_ptr = crear_nodo("-GET_PENULTIMATE_POSITION-", gpp_vec_num_ptr, NULL);
             fprintf(orden_reglas, "get_penultimate_position_1\n");
             printf("\nEjecutando get_penultimate_position\n");
       };
@@ -606,7 +595,7 @@ gpp_lista_aritmetica:
 
 binary_count:
       FUNCT_BC PAREN_A bc_vector_numerico PAREN_C {
-            bin_count_ptr = crear_nodo("-BINARY_COUNT-", crear_hoja("@count"), bc_vec_num_ptr);
+            bin_count_ptr = crear_nodo("-BINARY_COUNT-", bc_vec_num_ptr, NULL);
             fprintf(orden_reglas, "binary_count_1\n");
             printf("\nEjecutando binary_count \n");
       }
