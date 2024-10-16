@@ -558,13 +558,17 @@ gpp_lista_aritmetica:
                         *aux_nodo,
                         *res_nodo,
                         *cuerpo_nodo;
+            Simbolo     aux_simbolo = {"@aux", "", "-", 0},
+                        res_simbolo = {"@res", "", "-", 0};
 
             //aux = yytext;
+            write_symbol_table(aux_simbolo);
             aux_hoja = crear_hoja("@aux");
             yytext_hoja = crear_hoja(yytext);
             aux_nodo = crear_nodo(":=", aux_hoja, yytext_hoja);
 
             //res = NULL;
+            write_symbol_table(res_simbolo);
             res_hoja = crear_hoja("@res");
             res_nodo = crear_nodo(":=", res_hoja, crear_hoja("NULL"));
 
@@ -618,36 +622,42 @@ bc_vector_numerico:
 
 bc_lista_aritmetica:
       variable_aritmetica {
-            struct Nodo *asig_nodo = NULL,
-                        *res_nodo = NULL,
-                        *aux_nodo = NULL,
-                        *aux2_nodo = NULL,
-                        *flag_nodo = NULL,
-                        *condwhile_nodo = NULL,
-                        *condif1_nodo = NULL,
-                        *condif2_nodo = NULL,
-                        *condif3_nodo = NULL,
-                        *if_nodo = NULL,
-                        *cuerpo_res_nodo = NULL,
-                        *cuerpo_if_nodo = NULL,
-                        *cuerpo_asig_nodo = NULL,
-                        *cuerpo_while_nodo = NULL,
-                        *cuerpo_flag_nodo = NULL,
-                        *flag_0_nodo = NULL,
-                        *if_flag_nodo = NULL,
-                        *cond_if_flag_nodo = NULL,
-                        *cuerpo_if_flag_nodo = NULL,
-                        *count_nodo = NULL;
+            struct Nodo *asig_nodo,
+                        *res_nodo,
+                        *aux_nodo,
+                        *aux2_nodo,
+                        *flag_nodo,
+                        *condwhile_nodo,
+                        *condif1_nodo,
+                        *condif2_nodo,
+                        *condif3_nodo,
+                        *if_nodo,
+                        *cuerpo_res_nodo,
+                        *cuerpo_if_nodo,
+                        *cuerpo_asig_nodo,
+                        *cuerpo_while_nodo,
+                        *cuerpo_flag_nodo,
+                        *flag_0_nodo,
+                        *if_flag_nodo,
+                        *cond_if_flag_nodo,
+                        *cuerpo_if_flag_nodo,
+                        *count_nodo,
+                        *auxiliar_nodo;
+            Simbolo     count_simbolo = {"@count", "", "-", 0},
+                        aux_simbolo = {"@aux", "", "-", 0},
+                        flag_simbolo = {"@flag", "", "-", 0};
             
-            struct Nodo* auxiliar_nodo;
             //bc_list_arit_ptr = var_arit_ptr;
             //count = 0;
+            write_symbol_table(count_simbolo);
             auxiliar_nodo = crear_nodo(":=", crear_hoja("@count"), crear_hoja("0"));
             
             //aux = yytext;
+            write_symbol_table(aux_simbolo);
             asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
 
             //flag = 0;
+            write_symbol_table(flag_simbolo);
             flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("1"));
 
             //      res := aux % 10;
