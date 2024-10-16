@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define NAME_DOT_FILE "outputs/dot.txt"
+#define NAME_DOT_FILE "outputs/arbol-dot.txt"
 
 struct Nodo {
     char *valor;
