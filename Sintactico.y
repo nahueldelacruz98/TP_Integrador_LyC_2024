@@ -709,26 +709,26 @@ bc_lista_aritmetica:
             fprintf(orden_reglas, "bc_lista_aritmetica_1\n");
       }
       | bc_lista_aritmetica COMA variable_aritmetica {
-            struct Nodo *asig_nodo = NULL,
-                        *res_nodo = NULL,
-                        *aux_nodo = NULL,
-                        *aux2_nodo = NULL,
-                        *flag_nodo = NULL,
-                        *condwhile_nodo = NULL,
-                        *condif1_nodo = NULL,
-                        *condif2_nodo = NULL,
-                        *condif3_nodo = NULL,
-                        *if_nodo = NULL,
-                        *cuerpo_res_nodo = NULL,
-                        *cuerpo_if_nodo = NULL,
-                        *cuerpo_asig_nodo = NULL,
-                        *cuerpo_while_nodo = NULL,
-                        *cuerpo_flag_nodo = NULL,
-                        *flag_0_nodo = NULL,
-                        *if_flag_nodo = NULL,
-                        *cond_if_flag_nodo = NULL,
-                        *cuerpo_if_flag_nodo = NULL,
-                        *count_nodo = NULL;
+            struct Nodo *asig_nodo,
+                        *res_nodo,
+                        *aux_nodo,
+                        *aux2_nodo,
+                        *flag_nodo,
+                        *condwhile_nodo,
+                        *condif1_nodo,
+                        *condif2_nodo,
+                        *condif3_nodo,
+                        *if_nodo,
+                        *cuerpo_res_nodo,
+                        *cuerpo_if_nodo,
+                        *cuerpo_asig_nodo,
+                        *cuerpo_while_nodo,
+                        *cuerpo_flag_nodo,
+                        *flag_0_nodo,
+                        *if_flag_nodo,
+                        *cond_if_flag_nodo,
+                        *cuerpo_if_flag_nodo,
+                        *count_nodo;
             
             //aux = yytext;
             asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
