@@ -8,9 +8,8 @@
 #include "y.tab.h"
 
 #include "utils/intermediate-code.c"
-#include "utils/arbol-sintactico.c"
 #include "utils/symbol-table.c"
-#include "utils/pila.c"
+#include "utils/generacion_assembler.c"
 
 int   yystopparser=0,
       yyerror(),
@@ -118,6 +117,7 @@ start:
       bloque_cod1go {
             imprimir_postorden(bloq_cod_ptr);
             generar_archivo_DOT(bloq_cod_ptr);
+            generar_archivo_assembler(bloq_cod_ptr);
             liberar_arbol(bloq_cod_ptr);
       }
 

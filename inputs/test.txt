@@ -1,10 +1,19 @@
-*- Asignacion/Inicializacion de variables -*
+x := 99999.99
+x := 99.
+x := .9999
 
-x := 0
-x := -5
-x := -9999999999
-x := 1
-x := 100
+si(y >= x) {
 
-x =: z * 17.1 + 8
-resFloat =: a + 1 * (b*c - d) / 1.2
+        y =: y - 1
+        si(y == x) {
+
+        y =: y * 1
+
+        }
+
+        si(y == x) {
+
+        y =: y * 1
+
+        }
+    }
