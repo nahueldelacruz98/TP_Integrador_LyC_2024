@@ -1,4 +1,2 @@
 Nombre,TipoDato,Valor,Longitud
 _99999.99,CTE_FLOAT,99999.99,
-_99.,CTE_FLOAT,99.00,
-_.9999,CTE_FLOAT,1.00,

@@ -18,6 +18,7 @@ void cargar_valor_copro_en_variable(char*variable);
 void escribir_instruccion(char*variable);
 int esUnComparador(char*valorNodo);
 void escribirComparador(char*valorNodo);
+void tratamientoIfElse(struct Nodo*nodo);
 
 void copiar_template_archivo(){
     FILE *archivoOrigen, *archivoDestino;
@@ -71,18 +72,20 @@ char*escribir_nodo_arbol(struct Nodo* nodo){
         return NULL;
     }
 
+    if(nodo->izq == NULL && nodo->der == NULL){
+        return nodo->valor;
+    }
+
     if(strcmp(nodo->valor,"-IF-") == 0) {
         fprintf(archivo,"ET_START_IF_%d:\n",cantidad_etiqueta_if);
         char caracter[10];
-        sprintf(caracter,"%d",cantidad_etiqueta_if); 
-        printf("caracter %s", caracter);
+        sprintf(caracter,"%d",cantidad_etiqueta_if); //convierto int en char*
         apilar(pila_ifs,caracter);
-        printf("Tope de pila: %s\n",(char*)verTope(pila_ifs));//Para ver tope
         cantidad_etiqueta_if++;
-    }
-
-    if(nodo->izq == NULL && nodo->der == NULL){
-        return nodo->valor;
+    } else if(strcmp(nodo->valor,"-CUERPO IF/ELSE-") == 0) {
+        tratamientoIfElse(nodo);
+        nodo->der->valor = strdup("-SENTENCIA-"); //Para que despues no procese mas el subarbol derecho
+        nodo->izq->valor = strdup("-SENTENCIA-"); //Para que despues no procese mas el subarbol izquierdo
     }
 
     char*valorHojaIzq = escribir_nodo_arbol(nodo->izq);
@@ -151,8 +154,9 @@ char*escribir_nodo_arbol(struct Nodo* nodo){
         escribirComparador(valorNodo);
     } else if(strcmp(valorNodo,"-IF-") == 0) { 
         char*nroEtiqueta = (char*)desapilar(pila_ifs);
+        printf("Elemento sacado de la pila: %s\n",nroEtiqueta);
         fprintf(archivo,"ET_END_IF_%s:\n",nroEtiqueta);
-    }
+    } 
     
     return valorNodo;
 
@@ -170,9 +174,26 @@ int esUnComparador(char*valorNodo){
     return res;
 }
 
+void tratamientoIfElse(struct Nodo*nodo){
+
+    escribir_nodo_arbol(nodo->izq); //Escribo todo lo del lado izquierdo
+    //Termino el lado del THEN, escribo JMP y arranco la etiqueta del else
+    fprintf(archivo,"JMP ET_END_IF_%d\n",cantidad_etiqueta_if);
+    char*etiquetaElse = (char*)desapilar(pila_ifs);
+    printf("Elemento sacado de la pila: %s\n",etiquetaElse);
+    fprintf(archivo,"ET_END_IF_%s:\n",etiquetaElse);
+    //Apilo nueva etiqueta
+    char caracter[10];
+    sprintf(caracter,"%d",cantidad_etiqueta_if); //convierto int en char*
+    printf("numero a apilar: %s\n", caracter);
+    apilar(pila_ifs,caracter);
+    cantidad_etiqueta_if++;
+    escribir_nodo_arbol(nodo->der); //Escribo todo lo del lado derecho
+    //Lo que hago con el nodo, lo hago fuera de esta funcion
+}
+
 void escribirComparador(char*valorNodo){
     char*nroEtiqueta = (char*)verTope(pila_ifs);
-    printf("nro etiqueta s = %s\n",nroEtiqueta);
     if(strcmp(valorNodo,"==") == 0) {
         fprintf(archivo,"JNE ET_END_IF_%s\n",nroEtiqueta);
     } else if(strcmp(valorNodo,"<>") == 0) {

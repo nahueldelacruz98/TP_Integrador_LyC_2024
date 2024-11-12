@@ -1,1 +1,1 @@
- x 99999.99 := x 99. := -SENTENCIA- x .9999 := -SENTENCIA- y x >= y y 1 - =: y x == y y 1 * =: -IF- -SENTENCIA- y x == y y 1 * =: -IF- -SENTENCIA- -IF- -SENTENCIA-
+ x 99999.99 := y x == y y 1 * =: y y 2 / =: -CUERPO IF/ELSE- -IF- -SENTENCIA-
