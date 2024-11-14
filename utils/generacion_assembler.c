@@ -8,7 +8,11 @@
 
 FILE *archivo;
 int cantidad_etiqueta_if = 1;
-Pila  *pila_ifs = NULL;
+int cantidad_etiqueta_while = 1;
+Pila *pila_ifs = NULL;
+Pila *pila_whiles = NULL;
+bool boolComparacionOrEncontrada = false;
+bool boolComparacionIf = true;
 
 void generar_archivo_assembler(struct Nodo* raiz);
 char*escribir_nodo_arbol(struct Nodo* nodo);
@@ -57,12 +61,20 @@ void generar_archivo_assembler(struct Nodo* raiz) {
     }
 
     pila_ifs = crear_pila();
+    pila_whiles = crear_pila();
 
     if (raiz != NULL) {
+        fprintf(archivo,"include numbers.asm\ninclude macros2.asm\n\n.MODEL SMALL\n.386\n.STACK 200h\n\n.DATA\n");
+        //Funcion para escribir .DATA
+        fprintf(archivo,"\n.CODE\nSTART:\n\n\tMOV AX, @DATA\n\tMOV DS, AX\n\n");
         escribir_nodo_arbol(raiz);
+        fprintf(archivo,"\n\tMOV AX, 4C00h\n\tINT 21h\n\nEND START");
     }
 
+    liberar_pila(pila_ifs);
+    liberar_pila(pila_whiles);
     fclose(archivo);
+    
 }
 
 
@@ -76,16 +88,34 @@ char*escribir_nodo_arbol(struct Nodo* nodo){
         return nodo->valor;
     }
 
+    if(strcmp(nodo->valor,"-END-") == 0){
+        return nodo->valor;
+    }
+
     if(strcmp(nodo->valor,"-IF-") == 0) {
+        boolComparacionIf = true;
         fprintf(archivo,"ET_START_IF_%d:\n",cantidad_etiqueta_if);
-        char caracter[10];
-        sprintf(caracter,"%d",cantidad_etiqueta_if); //convierto int en char*
-        apilar(pila_ifs,caracter);
+        //Apilo numero
+        int* punteroNumero = (int*)malloc(sizeof(int));
+        *punteroNumero = cantidad_etiqueta_if;
+        apilar(pila_ifs,punteroNumero);
         cantidad_etiqueta_if++;
+    } else if(strcmp(nodo->valor,"-WHILE-") == 0) {
+        boolComparacionIf = false;
+        printf("while encontrado. Numero while %d\n",cantidad_etiqueta_while);
+        fprintf(archivo,"ET_START_WHILE_%d:\n",cantidad_etiqueta_while);
+        //Apilo numero
+        int* punteroNumero = (int*)malloc(sizeof(int));
+        *punteroNumero = cantidad_etiqueta_while;
+        apilar(pila_whiles,punteroNumero);
+        cantidad_etiqueta_while++;
     } else if(strcmp(nodo->valor,"-CUERPO IF/ELSE-") == 0) {
         tratamientoIfElse(nodo);
-        nodo->der->valor = strdup("-SENTENCIA-"); //Para que despues no procese mas el subarbol derecho
-        nodo->izq->valor = strdup("-SENTENCIA-"); //Para que despues no procese mas el subarbol izquierdo
+        nodo->der->valor = strdup("-END-"); //Para que despues no procese mas el subarbol derecho
+        nodo->izq->valor = strdup("-END-"); //Para que despues no procese mas el subarbol izquierdo
+    } else if(strcmp(nodo->valor,"OR") == 0) {
+        
+        boolComparacionOrEncontrada = true;
     }
 
     char*valorHojaIzq = escribir_nodo_arbol(nodo->izq);
@@ -152,11 +182,18 @@ char*escribir_nodo_arbol(struct Nodo* nodo){
         escribir_instruccion("FSTSW ax");
         escribir_instruccion("SAHF");
         escribirComparador(valorNodo);
+        
     } else if(strcmp(valorNodo,"-IF-") == 0) { 
-        char*nroEtiqueta = (char*)desapilar(pila_ifs);
-        printf("Elemento sacado de la pila: %s\n",nroEtiqueta);
-        fprintf(archivo,"ET_END_IF_%s:\n",nroEtiqueta);
-    } 
+        printf("IF finalizado. Numero while %d\n",cantidad_etiqueta_while);
+        int* valorDesapilado = (int*)desapilar(pila_ifs);
+
+        fprintf(archivo,"ET_END_IF_%d:\n",*valorDesapilado);
+    } else if(strcmp(valorNodo,"-WHILE-") == 0) {
+        printf("while finalizado. Numero while %d\n",cantidad_etiqueta_while);
+        int* valorDesapilado = (int*)desapilar(pila_whiles);
+        fprintf(archivo,"\tJMP ET_START_WHILE_%d\n",*valorDesapilado);
+        fprintf(archivo,"ET_END_WHILE_%d:\n",*valorDesapilado);
+    }
     
     return valorNodo;
 
@@ -178,45 +215,73 @@ void tratamientoIfElse(struct Nodo*nodo){
 
     escribir_nodo_arbol(nodo->izq); //Escribo todo lo del lado izquierdo
     //Termino el lado del THEN, escribo JMP y arranco la etiqueta del else
-    fprintf(archivo,"JMP ET_END_IF_%d\n",cantidad_etiqueta_if);
-    char*etiquetaElse = (char*)desapilar(pila_ifs);
-    printf("Elemento sacado de la pila: %s\n",etiquetaElse);
-    fprintf(archivo,"ET_END_IF_%s:\n",etiquetaElse);
+    fprintf(archivo,"\tJMP ET_END_IF_%d\n",cantidad_etiqueta_if);
+    int* valorDesapilado = (int*)desapilar(pila_ifs);
+    printf("desapilado\n");
+    fprintf(archivo,"ET_END_IF_%d:\n",*valorDesapilado);
     //Apilo nueva etiqueta
-    char caracter[10];
-    sprintf(caracter,"%d",cantidad_etiqueta_if); //convierto int en char*
-    printf("numero a apilar: %s\n", caracter);
-    apilar(pila_ifs,caracter);
+    int* punteroNumero = (int*)malloc(sizeof(int));
+    *punteroNumero = cantidad_etiqueta_if;
+    apilar(pila_ifs,punteroNumero);
     cantidad_etiqueta_if++;
     escribir_nodo_arbol(nodo->der); //Escribo todo lo del lado derecho
     //Lo que hago con el nodo, lo hago fuera de esta funcion
 }
 
 void escribirComparador(char*valorNodo){
-    char*nroEtiqueta = (char*)verTope(pila_ifs);
-    if(strcmp(valorNodo,"==") == 0) {
-        fprintf(archivo,"JNE ET_END_IF_%s\n",nroEtiqueta);
-    } else if(strcmp(valorNodo,"<>") == 0) {
-        fprintf(archivo,"JE ET_END_IF_%s\n",nroEtiqueta);
-    } else if(strcmp(valorNodo,">") == 0) {
-        fprintf(archivo,"JNA ET_END_IF_%s\n",nroEtiqueta);
-    } else if(strcmp(valorNodo,"<") == 0) {
-        fprintf(archivo,"JAE ET_END_IF_%s\n",nroEtiqueta);
-    } else if(strcmp(valorNodo,">=") == 0) {
-        fprintf(archivo,"JB ET_END_IF_%s\n",nroEtiqueta);
-    } else if(strcmp(valorNodo,"<=") == 0) {
-        fprintf(archivo,"JA ET_END_IF_%s\n",nroEtiqueta);
-    } 
+    
+    int*nroEtiqueta;
+    char finEtiqueta[20];
+    if(boolComparacionIf) {
+        nroEtiqueta = (int*)verTope(pila_ifs);
+        strcpy(finEtiqueta,"ET_END_IF_");
+    } else {
+        nroEtiqueta = (int*)verTope(pila_whiles);
+        strcpy(finEtiqueta,"ET_END_WHILE_");
+    }
+
+    if(boolComparacionOrEncontrada){
+        if(strcmp(valorNodo,"==") == 0) {
+        fprintf(archivo,"\tJE %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,"<>") == 0) {
+            fprintf(archivo,"\tJNE %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,">") == 0) {
+            fprintf(archivo,"\tJA %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,"<") == 0) {
+            fprintf(archivo,"\tJB %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,">=") == 0) {
+            fprintf(archivo,"\tJAE %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,"<=") == 0) {
+            fprintf(archivo,"\tJNA %s%d\n",finEtiqueta,*nroEtiqueta);
+        }
+
+        boolComparacionOrEncontrada = false;
+    } else {
+        if(strcmp(valorNodo,"==") == 0) {
+        fprintf(archivo,"\tJNE %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,"<>") == 0) {
+            fprintf(archivo,"\tJE %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,">") == 0) {
+            fprintf(archivo,"\tJNA %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,"<") == 0) {
+            fprintf(archivo,"\tJAE %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,">=") == 0) {
+            fprintf(archivo,"\tJB %s%d\n",finEtiqueta,*nroEtiqueta);
+        } else if(strcmp(valorNodo,"<=") == 0) {
+            fprintf(archivo,"\tJA %s%d\n",finEtiqueta,*nroEtiqueta);
+        }
+    }
+     
 }
 
 void escribir_instruccion(char*variable){
-    fprintf(archivo,"%s\n",variable);
+    fprintf(archivo,"\t%s\n",variable);
 }
 
 void escribir_valor_assembler(char*variable){
-    fprintf(archivo,"FLD %s\n",variable); //Logica para decidir cuando usar FLD o FILD
+    fprintf(archivo,"\tFLD %s\n",variable); //Logica para decidir cuando usar FLD o FILD
 }
 
 void cargar_valor_copro_en_variable(char*variable) {
-    fprintf(archivo,"FSTP %s\n",variable); //Logica para decidir cuando usar FSTP o FISTP
+    fprintf(archivo,"\tFSTP %s\n",variable); //Logica para decidir cuando usar FSTP o FISTP
 }

@@ -1,8 +1,21 @@
 x := 99999.99
 
-si(y == x) {
+mientras (x > y AND NOT d < 0) {
 
-        y =: y * 1
-} sino {
-        y =: y / 2
+    x =: x - 1
+
+}
+ 
+mientras (x >= y OR d <> 0) {
+
+    x =: x - 1
+
+    si (x > 5) {
+
+        x =: x - 1
+
+    } sino {
+        x =: x + 1
+    }
+
 }

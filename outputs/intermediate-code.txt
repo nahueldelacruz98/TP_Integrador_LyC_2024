@@ -1,1 +1,1 @@
- x 99999.99 := y x == y y 1 * =: y y 2 / =: -CUERPO IF/ELSE- -IF- -SENTENCIA-
+ x 99999.99 := x y > d 0 >= AND x x 1 - =: -WHILE- -SENTENCIA- x y >= d 0 <> OR x x 1 - =: x 5 > x x 1 - =: x x 1 + =: -CUERPO IF/ELSE- -IF- -SENTENCIA- -WHILE- -SENTENCIA-
