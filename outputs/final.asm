@@ -13,7 +13,71 @@ START:
 	MOV AX, @DATA
 	MOV DS, AX
 
+	FLD 0
+	FSTP x
+	FLD -5
+	FSTP x
+	FLD -9999999999
+	FSTP x
+	FLD 1
+	FSTP x
+	FLD 100
+	FSTP x
+	FLD 0.1
+	FSTP x
+	FLD 1.0
+	FSTP x
+	FLD 22.22222
+	FSTP x
+	FLD 9.000001
+	FSTP x
 	FLD 99999.99
+	FSTP x
+	FLD 99.
+	FSTP x
+	FLD .9999
+	FSTP x
+	FLD -0.1
+	FSTP x
+	FLD -1.0
+	FSTP x
+	FLD -22.22222
+	FSTP x
+	FLD -9.000001
+	FSTP x
+	FLD -99999.99
+	FSTP x
+	FLD -99.
+	FSTP x
+	FLD -.9999
+	FSTP x
+	FLD "@sdADaSjfla%dfg$&/8()"
+	FSTP y
+	FLD "       asldk  fh sjf "
+	FSTP y
+	FLD "1"
+	FSTP y
+	FLD " "
+	FSTP y
+	FLD "2146546534543"
+	FSTP y
+	FLD b
+	FLD c
+	FMUL
+	FLD d
+	FSUB
+	FLD 1
+	FMUL
+	FLD 1.2
+	FDIV
+	FLD a
+	FADD
+	FSTP resFloat
+	FLD z
+	FLD 17.1
+	FMUL
+	FLD 8
+	FADD
 	FSTP x
 ET_START_WHILE_1:
 	FLD x
@@ -55,27 +119,557 @@ ET_START_WHILE_2:
 	FLD 1
 	FSUB
 	FSTP x
-ET_START_IF_1:
+ET_START_WHILE_3:
 	FLD x
 	FLD 5
 	FXCH
 	FCOM
 	FSTSW ax
 	SAHF
-	JNA ET_END_IF_1
+	JNA ET_END_WHILE_3
 	FLD x
 	FLD 1
 	FSUB
 	FSTP x
-	JMP ET_END_IF_2
-ET_END_IF_1:
-	FLD x
-	FLD 1
-	FADD
-	FSTP x
-ET_END_IF_2:
+	JMP ET_START_WHILE_3
+ET_END_WHILE_3:
 	JMP ET_START_WHILE_2
 ET_END_WHILE_2:
+ET_START_IF_1:
+	FLD y
+	FLD x
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JA ET_END_IF_1
+	FLD y
+	FLD 2
+	FMUL
+	FSTP x
+ET_END_IF_1:
+ET_START_IF_2:
+	FLD y
+	FLD x
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JB ET_END_IF_2
+	FLD y
+	FLD 1
+	FSUB
+	FSTP y
+ET_END_IF_2:
+ET_START_IF_3:
+	FLD y
+	FLD x
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_3
+	FLD y
+	FLD 1
+	FMUL
+	FSTP y
+	JMP ET_END_IF_4
+ET_END_IF_3:
+	FLD y
+	FLD 2
+	FDIV
+	FSTP y
+ET_END_IF_4:
+getString a
+displayString "Hola mundo"
+	FLD 3
+	FSTP @aux
+	FLD NULL
+	FSTP @res
+	FLD @aux
+	FSTP @res
+	FLD 8.2
+	FSTP @aux
+	FLD @aux
+	FSTP @res
+	FLD 2
+	FSTP @aux
+	FLD @aux
+	FSTP @res
+	FLD 55.5
+	FSTP @aux
+	FLD @res
+	FSTP a
+	FLD 123456789
+	FSTP @aux
+	FLD NULL
+	FSTP @res
+	FLD @res
+	FSTP b
+	FLD 0
+	FSTP @count
+	FLD 110
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_4:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_4
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_5:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_5
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_5
+	FLD 0
+	FSTP @flag
+ET_END_IF_5:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_4
+ET_END_WHILE_4:
+ET_START_IF_6:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_6
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_6:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD 1
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_5:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_5
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_7:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_7
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_7
+	FLD 0
+	FSTP @flag
+ET_END_IF_7:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_5
+ET_END_WHILE_5:
+ET_START_IF_8:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_8
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_8:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD 0
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_6:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_6
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_9:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_9
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_9
+	FLD 0
+	FSTP @flag
+ET_END_IF_9:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_6
+ET_END_WHILE_6:
+ET_START_IF_10:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_10
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_10:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD 5
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_7:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_7
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_11:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_11
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_11
+	FLD 0
+	FSTP @flag
+ET_END_IF_11:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_7
+ET_END_WHILE_7:
+ET_START_IF_12:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_12
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_12:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD x
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_8:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_8
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_13:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_13
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_13
+	FLD 0
+	FSTP @flag
+ET_END_IF_13:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_8
+ET_END_WHILE_8:
+ET_START_IF_14:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_14
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_14:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD 10101100
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_9:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_9
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_15:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_15
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_15
+	FLD 0
+	FSTP @flag
+ET_END_IF_15:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_9
+ET_END_WHILE_9:
+ET_START_IF_16:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_16
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_16:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD -1
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_10:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_10
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_17:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_17
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_17
+	FLD 0
+	FSTP @flag
+ET_END_IF_17:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_10
+ET_END_WHILE_10:
+ET_START_IF_18:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_18
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_18:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD @res
+	FSTP c
+	FLD 0
+	FSTP @count
+	FLD b
+	FSTP @aux
+	FLD 1
+	FSTP @flag
+ET_START_WHILE_11:
+	FLD @aux
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNA ET_END_WHILE_11
+	FLD @aux
+	FLD 10
+	FPREM
+	FSTP @res
+ET_START_IF_19:
+	FLD @res
+	FLD 0
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_19
+	FLD @res
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JE ET_END_IF_19
+	FLD 0
+	FSTP @flag
+ET_END_IF_19:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	JMP ET_START_WHILE_11
+ET_END_WHILE_11:
+ET_START_IF_20:
+	FLD @flag
+	FLD 1
+	FXCH
+	FCOM
+	FSTSW ax
+	SAHF
+	JNE ET_END_IF_20
+	FLD @count
+	FLD 1
+	FADD
+	FSTP @count
+ET_END_IF_20:
+	FLD @aux
+	FLD 10
+	FDIV
+	FSTP @aux
+	FLD @res
+	FSTP d
 
 	MOV AX, 4C00h
 	INT 21h

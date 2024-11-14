@@ -125,7 +125,9 @@ char*escribir_nodo_arbol(struct Nodo* nodo){
     
     if(strcmp(valorNodo,":=") == 0) { //Operador de asignacion
         
-        escribir_valor_assembler(valorHojaDer);
+        if(strcmp(valorHojaDer,"-OPERACION-") != 0){
+            escribir_valor_assembler(valorHojaDer);
+        }
         cargar_valor_copro_en_variable(valorHojaIzq);
         nodo->valor = strdup("-SENTENCIA-");
 
@@ -150,6 +152,15 @@ char*escribir_nodo_arbol(struct Nodo* nodo){
         }
         escribir_instruccion("FDIV");
         valorNodo = strdup("-OPERACION-");
+    } else if(strcmp(valorNodo,"%") == 0) {
+        if(strcmp(valorHojaIzq,"-OPERACION-") != 0) {
+            escribir_valor_assembler(valorHojaIzq);
+        }
+        if(strcmp(valorHojaDer,"-OPERACION-") != 0) {
+            escribir_valor_assembler(valorHojaDer);
+        }
+        escribir_instruccion("FPREM");
+        valorNodo = strdup("-OPERACION-");
     } else if(strcmp(valorNodo,"+") == 0) {
         if(strcmp(valorHojaIzq,"-OPERACION-") != 0) {
             escribir_valor_assembler(valorHojaIzq);
@@ -173,6 +184,8 @@ char*escribir_nodo_arbol(struct Nodo* nodo){
     } else if(strcmp(valorNodo,"-ESCRITURA-") == 0) {
         fprintf(archivo,"displayString %s\n",valorHojaDer);
     } else if(strcmp(valorNodo,"-GET_PENULTIMATE_POSITION-") == 0) {
+        valorNodo = strdup("@res");
+    } else if(strcmp(valorNodo,"-BINARY_COUNT-") == 0) {
         valorNodo = strdup("@res");
     } else if(esUnComparador(valorNodo) == 0) {
         escribir_valor_assembler(valorHojaIzq);

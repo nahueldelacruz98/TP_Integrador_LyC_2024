@@ -663,12 +663,12 @@ bc_lista_aritmetica:
             //      if(res <> 0 | res <> 1)
             condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
             condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
-            condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
+            condif3_nodo = crear_nodo("OR", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
             flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
 
-            if_nodo = crear_nodo("IF", condif3_nodo, flag_0_nodo);
+            if_nodo = crear_nodo("-IF-", condif3_nodo, flag_0_nodo);
 
             //      aux := aux / 10;
             aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -679,7 +679,7 @@ bc_lista_aritmetica:
 
             //while(aux > 0):
             condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
-            condwhile_nodo = crear_nodo("WHILE", condwhile_nodo, cuerpo_res_nodo);
+            condwhile_nodo = crear_nodo("-WHILE-", condwhile_nodo, cuerpo_res_nodo);
 
             //aux := aux / 10;
             aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -692,7 +692,7 @@ bc_lista_aritmetica:
             count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
             count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
 
-            if_flag_nodo = crear_nodo("IF", cond_if_flag_nodo, count_nodo);
+            if_flag_nodo = crear_nodo("-IF-", cond_if_flag_nodo, count_nodo);
 
             cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
             cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, cuerpo_if_flag_nodo);
@@ -739,12 +739,12 @@ bc_lista_aritmetica:
             //      if(res <> 0 | res <> 1)
             condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
             condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
-            condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
+            condif3_nodo = crear_nodo("OR", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
             flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
 
-            if_nodo = crear_nodo("IF", condif3_nodo, flag_0_nodo);
+            if_nodo = crear_nodo("-IF-", condif3_nodo, flag_0_nodo);
 
             //      aux := aux / 10;
             aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -755,7 +755,7 @@ bc_lista_aritmetica:
 
             //while(aux > 0):
             condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
-            condwhile_nodo = crear_nodo("WHILE", condwhile_nodo, cuerpo_res_nodo);
+            condwhile_nodo = crear_nodo("-WHILE-", condwhile_nodo, cuerpo_res_nodo);
 
             //aux := aux / 10;
             aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -768,7 +768,7 @@ bc_lista_aritmetica:
             count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
             count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
 
-            if_flag_nodo = crear_nodo("IF", cond_if_flag_nodo, count_nodo);
+            if_flag_nodo = crear_nodo("-IF-", cond_if_flag_nodo, count_nodo);
 
             cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
             cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, cuerpo_if_flag_nodo);
