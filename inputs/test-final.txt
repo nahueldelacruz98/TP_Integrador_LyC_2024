@@ -84,8 +84,9 @@ si(y >= x) {
 si(y == x) {
 
         y =: y * 1
-
-    }
+} sino {
+        y =: y / 2
+}
 
 *- Entrada y salida -*
 

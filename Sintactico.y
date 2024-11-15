@@ -9,9 +9,8 @@
 
 #include "utils/lista/lista.c"
 #include "utils/intermediate-code.c"
-#include "utils/arbol-sintactico.c"
-#include "utils/symbol-table.c"
-#include "utils/pila.c"
+#include "utils/symbol-table/symbol-table.c"
+#include "utils/generacion-assembler.c"
 
 void generar_asm();
 void generar_asm_data(tLista *p);
@@ -127,7 +126,7 @@ start:
       bloque_cod1go {
             imprimir_postorden(bloq_cod_ptr);
             generar_archivo_DOT(bloq_cod_ptr);
-            generar_asm();
+            generar_archivo_assembler(bloq_cod_ptr, &list_symbol_table);
             liberar_arbol(bloq_cod_ptr);
       }
 
@@ -305,12 +304,8 @@ constante:
             Simbolo simbolo = {"", "CTE_INTEGER", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
-            //write_symbol_table(simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
-            printf("\nLISTA EN CONST\n");
-            mostrarLista(&list_constantes, mostrarSimbolo);
-            printf("ISTA EN CONST\n");
 
             const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_1\n");
@@ -320,12 +315,8 @@ constante:
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));
-            //write_symbol_table(simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
-            printf("\nLISTA EN CONST\n");
-            mostrarLista(&list_constantes, mostrarSimbolo);
-            printf("ISTA EN CONST\n");
 
             const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_2\n");
@@ -337,12 +328,8 @@ constante:
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.nombre, MAX_LENGTH, "_%.*s", len, yytext + 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.*s", len, yytext + 1);
-            //write_symbol_table(simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
-            printf("\nLISTA EN CONST\n");
-            mostrarLista(&list_constantes, mostrarSimbolo);
-            printf("ISTA EN CONST\n");
 
             const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_3\n");
@@ -805,7 +792,6 @@ bc_lista_aritmetica:
             asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
 
             //flag = 0;
-            //write_symbol_table(flag_simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &flag_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("1"));
 
@@ -816,12 +802,12 @@ bc_lista_aritmetica:
             //      if(res <> 0 | res <> 1)
             condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
             condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
-            condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
+            condif3_nodo = crear_nodo("OR", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
             flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
 
-            if_nodo = crear_nodo("IF", condif3_nodo, flag_0_nodo);
+            if_nodo = crear_nodo("-IF-", condif3_nodo, flag_0_nodo);
 
             //      aux := aux / 10;
             aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -832,7 +818,7 @@ bc_lista_aritmetica:
 
             //while(aux > 0):
             condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
-            condwhile_nodo = crear_nodo("WHILE", condwhile_nodo, cuerpo_res_nodo);
+            condwhile_nodo = crear_nodo("-WHILE-", condwhile_nodo, cuerpo_res_nodo);
 
             //aux := aux / 10;
             aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -845,7 +831,7 @@ bc_lista_aritmetica:
             count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
             count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
 
-            if_flag_nodo = crear_nodo("IF", cond_if_flag_nodo, count_nodo);
+            if_flag_nodo = crear_nodo("-IF-", cond_if_flag_nodo, count_nodo);
 
             cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
             cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, cuerpo_if_flag_nodo);
@@ -892,12 +878,12 @@ bc_lista_aritmetica:
             //      if(res <> 0 | res <> 1)
             condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
             condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
-            condif3_nodo = crear_nodo("|", condif1_nodo, condif2_nodo);
+            condif3_nodo = crear_nodo("OR", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
             flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
 
-            if_nodo = crear_nodo("IF", condif3_nodo, flag_0_nodo);
+            if_nodo = crear_nodo("-IF-", condif3_nodo, flag_0_nodo);
 
             //      aux := aux / 10;
             aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -908,7 +894,7 @@ bc_lista_aritmetica:
 
             //while(aux > 0):
             condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
-            condwhile_nodo = crear_nodo("WHILE", condwhile_nodo, cuerpo_res_nodo);
+            condwhile_nodo = crear_nodo("-WHILE-", condwhile_nodo, cuerpo_res_nodo);
 
             //aux := aux / 10;
             aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
@@ -921,7 +907,7 @@ bc_lista_aritmetica:
             count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
             count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
 
-            if_flag_nodo = crear_nodo("IF", cond_if_flag_nodo, count_nodo);
+            if_flag_nodo = crear_nodo("-IF-", cond_if_flag_nodo, count_nodo);
 
             cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
             cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, cuerpo_if_flag_nodo);
@@ -969,32 +955,4 @@ int main(int argc, char *argv[]) {
 int yyerror(void) {
       printf("Error Sintactico\n");
       return 1;
-}
-
-void generar_asm() {
-      generar_asm_data(&list_symbol_table);
-}
-
-void generar_asm_data(tLista *p) {
-      FILE *pf = fopen("outputs/asm.txt", "wt");
-      list_symbol_table;
-
-      fprintf(pf, ".DATA\n");
-
-      while(*p){
-            Simbolo *simbolo = (Simbolo *)(*p)->info;
-            if(simbolo->longitud == 0) {
-                  fprintf(pf, "\t%s\tdd\t%s\n", 
-                          simbolo->nombre,
-                          strcmp(simbolo->valor, "") ? simbolo->valor : "?");
-            } else {
-                  fprintf(pf, "\t%s\tdb\t\"%s\",'$', %d dup (?)\n", 
-                          simbolo->nombre,
-                          simbolo->valor,
-                          simbolo->longitud);
-            }
-
-            p = &(*p)->sig;
-      }
-      fclose(pf);
 }

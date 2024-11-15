@@ -14,6 +14,7 @@ int pila_vacia(Pila* pila);
 int pila_llena(Pila* pila);
 void apilar(Pila* pila, void* valor);
 void* desapilar(Pila* pila);
+void* verTope(Pila* pila);
 
 // Función para crear una pila vacía
 Pila* crear_pila() {
@@ -43,6 +44,14 @@ void apilar(Pila* pila, void* valor) {
         return;
     }
     pila->elementos[++(pila->tope)] = valor;
+}
+
+void* verTope(Pila* pila) {
+    if (pila_vacia(pila)) {
+        printf("La pila está vacía, no se puede desapilar\n");
+        return NULL;
+    }
+    return pila->elementos[(pila->tope)];
 }
 
 // Función para desapilar un puntero
