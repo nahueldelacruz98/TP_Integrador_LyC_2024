@@ -960,9 +960,6 @@ int main(int argc, char *argv[]) {
       liberar_pila(pila_asig_arit);
       liberar_pila(pila_bloq_cod);
       liberar_pila(pila_cond_mult);
-      
-      printf("LISTA:\n");
-      mostrarLista(&list_symbol_table, mostrarSimbolo);
       vaciarLista(&list_symbol_table);
       vaciarLista(&list_constantes);
 
