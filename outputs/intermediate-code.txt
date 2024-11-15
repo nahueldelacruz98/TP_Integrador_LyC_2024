@@ -1,0 +1,1 @@
+ x _434.0 < b _1.0 <= AND a _2.0 > OR a 7 =: j x 32 + =: -SENTENCIA- a b =: -SENTENCIA- -IF- -SENTENCIA-

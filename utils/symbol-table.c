@@ -25,6 +25,7 @@ void mostrarSimbolo(const void *simb, FILE *fp);
 int compararNombre(const void *d1, const void *d2);
 int compararTipoDato(const Simbolo *simbolo_const, const Simbolo *simbolo_id);
 void copiarTipoDato(void *tipo_dato, const void *simbolo);
+const char *normalizarTipo(const char *tipo);
 
 int open_symbol_table(FILE *fp)
 {
@@ -100,28 +101,20 @@ int write_symbol_table(Simbolo simbolo, FILE *fp)
     return 0;
 }
 
-int compararTipoDato(const Simbolo *simbolo_const, const Simbolo *simbolo_id)
+const char *normalizarTipo(const char *tipo)
 {
-    if (strcmp(simbolo_const->tipo_dato, "CTE_INTEGER") == 0 &&
-        strcmp(simbolo_id->tipo_dato, "Int") == 0)
-    {
-        return 1;
-    }
-    else if (strcmp(simbolo_const->tipo_dato, "CTE_FLOAT") == 0 &&
-             strcmp(simbolo_id->tipo_dato, "Float") == 0)
-    {
-        return 1;
-    }
-    else if (strcmp(simbolo_const->tipo_dato, "CTE_STRING") == 0 &&
-             strcmp(simbolo_id->tipo_dato, "String") == 0)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-    return 0;
+    if (strcmp(tipo, "CTE_INTEGER") == 0 || strcmp(tipo, "Int") == 0)
+        return "INT";
+    else if (strcmp(tipo, "CTE_FLOAT") == 0 || strcmp(tipo, "Float") == 0)
+        return "FLOAT";
+    else if (strcmp(tipo, "CTE_STRING") == 0 || strcmp(tipo, "String") == 0)
+        return "STRING";
+    return "UNKNOWN";
+}
+
+int compararTipoDato(const Simbolo *simbolo_1, const Simbolo *simbolo_2)
+{
+    return strcmp(normalizarTipo(simbolo_1->tipo_dato), normalizarTipo(simbolo_2->tipo_dato));
 }
 
 void mostrarSimbolo(const void *simb, FILE *fp)

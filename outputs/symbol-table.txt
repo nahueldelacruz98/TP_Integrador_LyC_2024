@@ -1,3 +1,7 @@
-c1                                      Int                                                0         
-b1                                      Int                                                0         
-a1                                      Int                                                0         
+b                                       Float                                              0         
+j                                       Float                                              0         
+a                                       Float                                              0         
+x                                       Float                                              0         
+_434.0                                  CTE_FLOAT   434.00                                 0         
+_1.0                                    CTE_FLOAT   1.00                                   0         
+_2.0                                    CTE_FLOAT   2.00                                   0         

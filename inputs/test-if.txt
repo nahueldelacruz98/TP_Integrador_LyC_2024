@@ -1,4 +1,8 @@
-si(NOT x >= 434 AND NOT x > 1 OR x > 2) {
+init {
+    x, a, j, b : Float
+}
+
+si(NOT x >= 434.0 AND NOT b > 1.0 OR a > 2.0) {
     a =: 7
     j =: x + 32
     a =: b

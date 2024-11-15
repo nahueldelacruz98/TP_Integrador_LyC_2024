@@ -266,16 +266,10 @@ asignacion_variables:
                   printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
                   return 1;
             }
-
-            printf("----------------------------------------\n");
-            mostrarSimbolo(&simbolo_id, stdout);
-            mostrarSimbolo(&simbolo_const, stdout);
-            printf("----------------------------------------\n");
-
-            if(compararTipoDato(&simbolo_const, &simbolo_id)) {
+            if(!compararTipoDato(&simbolo_const, &simbolo_id)) {
                   asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_ptr);
             } else {
-                  printf("Error, el tipo de dato no es el esperado: variable tipo '%s', constante tipo '%s'.\n", simbolo_id.tipo_dato, simbolo_const.tipo_dato);
+                  printf("Error, el tipo de dato no es el esperado: variable/constante '%s' tipo '%s', variable/constante '%s' tipo '%s'.\n", simbolo_id.nombre, simbolo_id.tipo_dato, simbolo_const.nombre, simbolo_const.tipo_dato);
                   return 1;
             }
 
@@ -314,6 +308,9 @@ constante:
             //write_symbol_table(simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
+            printf("\nLISTA EN CONST\n");
+            mostrarLista(&list_constantes, mostrarSimbolo);
+            printf("ISTA EN CONST\n");
 
             const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_1\n");
@@ -326,6 +323,9 @@ constante:
             //write_symbol_table(simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
+            printf("\nLISTA EN CONST\n");
+            mostrarLista(&list_constantes, mostrarSimbolo);
+            printf("ISTA EN CONST\n");
 
             const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_2\n");
@@ -340,6 +340,9 @@ constante:
             //write_symbol_table(simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
+            printf("\nLISTA EN CONST\n");
+            mostrarLista(&list_constantes, mostrarSimbolo);
+            printf("ISTA EN CONST\n");
 
             const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_3\n");
@@ -409,8 +412,29 @@ condicion:
       valores_admitidos_condicion comparador {
             comp_ptr->izq = val_adm_cond_ptr; 
       } valores_admitidos_condicion {
-            comp_ptr->der = val_adm_cond_ptr;
-            cond_ptr = comp_ptr;
+            Simbolo simbolo_1;
+            Simbolo simbolo_2;
+
+            sacarUltimoLista(&list_constantes, &simbolo_1, sizeof(Simbolo));
+            sacarUltimoLista(&list_constantes, &simbolo_2, sizeof(Simbolo));
+
+            if(buscarEnLista(&list_symbol_table, &simbolo_1, simbolo_1.tipo_dato, compararNombre, copiarTipoDato)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_1.nombre);
+                  return 1;
+            }
+            if(buscarEnLista(&list_symbol_table, &simbolo_2, simbolo_2.tipo_dato, compararNombre, copiarTipoDato)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_2.nombre);
+                  return 1;
+            }
+
+            if(!compararTipoDato(&simbolo_1, &simbolo_2)) {
+                  comp_ptr->der = val_adm_cond_ptr;
+                  cond_ptr = comp_ptr;
+            } else {
+                  printf("Error, el tipo de dato no es el esperado: variable/constante '%s' tipo '%s', variable/constante '%s' tipo '%s'.\n", simbolo_1.nombre, simbolo_1.tipo_dato, simbolo_2.nombre, simbolo_2.tipo_dato);
+                  return 1;
+            }
+
             fprintf(orden_reglas, "condicion_1\n");
       }
       | COND_OP_NOT {
@@ -418,8 +442,29 @@ condicion:
       } valores_admitidos_condicion comparador {
             comp_ptr->izq = val_adm_cond_ptr;
       } valores_admitidos_condicion {
-            comp_ptr->der = val_adm_cond_ptr;
-            cond_ptr = comp_ptr;
+            Simbolo simbolo_1;
+            Simbolo simbolo_2;
+
+            sacarUltimoLista(&list_constantes, &simbolo_1, sizeof(Simbolo));
+            sacarUltimoLista(&list_constantes, &simbolo_2, sizeof(Simbolo));
+
+            if(buscarEnLista(&list_symbol_table, &simbolo_1, simbolo_1.tipo_dato, compararNombre, copiarTipoDato)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_1.nombre);
+                  return 1;
+            }
+            if(buscarEnLista(&list_symbol_table, &simbolo_2, simbolo_2.tipo_dato, compararNombre, copiarTipoDato)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_2.nombre);
+                  return 1;
+            }
+
+            if(!compararTipoDato(&simbolo_1, &simbolo_2)) {
+                  comp_ptr->der = val_adm_cond_ptr;
+                  cond_ptr = comp_ptr;
+            } else {
+                  printf("Error, el tipo de dato no es el esperado: variable/constante '%s' tipo '%s', variable/constante '%s' tipo '%s'.\n", simbolo_1.nombre, simbolo_1.tipo_dato, simbolo_2.nombre, simbolo_2.tipo_dato);
+                  return 1;
+            }
+            
             fprintf(orden_reglas, "condicion_2\n");
       }
       ;
@@ -432,15 +477,14 @@ valores_admitidos_condicion:
                   printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
                   return 1;
             }
+            
+            ponerAlFinal(&list_constantes, &simbolo_id, sizeof(Simbolo));
 
             val_adm_cond_ptr = crear_hoja($1);
             fprintf(orden_reglas, "valores_admitidos_condicion_1\n");
             printf("ID");
       }
       | constante {
-            Simbolo simbolo_const; //TODO
-            sacarUltimoLista(&list_constantes, &simbolo_const, sizeof(Simbolo)); //TODO
-
             val_adm_cond_ptr = const_ptr;
             fprintf(orden_reglas, "valores_admitidos_condicion_2\n");
             printf("CONSTANTE");
@@ -666,14 +710,12 @@ gpp_lista_aritmetica:
                         res_simbolo = {"@res", "CTE_INTEGER", "", 0};
 
             //aux = yytext;
-            //write_symbol_table(aux_simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &aux_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             aux_hoja = crear_hoja("@aux");
             yytext_hoja = crear_hoja(yytext);
             aux_nodo = crear_nodo(":=", aux_hoja, yytext_hoja);
 
             //res = NULL;
-            //write_symbol_table(res_simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &res_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             res_hoja = crear_hoja("@res");
             res_nodo = crear_nodo(":=", res_hoja, crear_hoja("NULL"));
@@ -755,12 +797,10 @@ bc_lista_aritmetica:
             
             //bc_list_arit_ptr = var_arit_ptr;
             //count = 0;
-            //write_symbol_table(count_simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &count_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             auxiliar_nodo = crear_nodo(":=", crear_hoja("@count"), crear_hoja("0"));
             
             //aux = yytext;
-            //write_symbol_table(aux_simbolo, arch_symbol_table);
             ponerAlFinalYEscribir(&list_symbol_table, &aux_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
 
@@ -945,10 +985,17 @@ void generar_asm_data(tLista *p) {
       fprintf(pf, ".DATA\n");
 
       while(*p){
-            //mostrar((*p)->info, stdout);
-            fprintf(pf, "\t%s\tdd\t%s\n", 
-                    ((Simbolo *)(*p)->info)->nombre,
-                    strcmp(((Simbolo *)(*p)->info)->valor, "") ? ((Simbolo *)(*p)->info)->valor : "?" );
+            Simbolo *simbolo = (Simbolo *)(*p)->info;
+            if(simbolo->longitud == 0) {
+                  fprintf(pf, "\t%s\tdd\t%s\n", 
+                          simbolo->nombre,
+                          strcmp(simbolo->valor, "") ? simbolo->valor : "?");
+            } else {
+                  fprintf(pf, "\t%s\tdb\t\"%s\",'$', %d dup (?)\n", 
+                          simbolo->nombre,
+                          simbolo->valor,
+                          simbolo->longitud);
+            }
 
             p = &(*p)->sig;
       }
