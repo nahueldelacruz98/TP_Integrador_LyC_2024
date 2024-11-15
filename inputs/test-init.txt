@@ -3,4 +3,5 @@ init {
     a2 : String
     a3: Float
     a534: Int
+    c1: String
 }

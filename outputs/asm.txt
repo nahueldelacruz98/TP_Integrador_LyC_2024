@@ -1,0 +1,41 @@
+.DATA
+	c1	dd	?
+	b1	dd	?
+	a1	dd	?
+	a2	dd	?
+	resFloat	dd	?
+	x	dd	?
+	a	dd	?
+	y	dd	?
+	b	dd	?
+	z	dd	?
+	d	dd	?
+	c	dd	?
+	_0	dd	0
+	_-5	dd	-5
+	_-9999999999	dd	-9999999999
+	_1	dd	1
+	_100	dd	100
+	_0.1	dd	0.10
+	_1.0	dd	1.00
+	_22.22222	dd	22.22
+	_9.000001	dd	9.00
+	_99999.99	dd	99999.99
+	_99.	dd	99.00
+	_.9999	dd	1.00
+	_-0.1	dd	-0.10
+	_-1.0	dd	-1.00
+	_-22.22222	dd	-22.22
+	_-9.000001	dd	-9.00
+	_-99999.99	dd	-99999.99
+	_-99.	dd	-99.00
+	_-.9999	dd	-1.00
+	_ @sdADaS  jfla%dfg$&/8()	dd	 @sdADaS  jfla%dfg$&/8()
+	_       asldk  fh sjf 	dd	       asldk  fh sjf 
+	_ 	dd	 
+	_2146546534543	dd	2146546534543
+	_5	dd	5
+	@aux	dd	?
+	@res	dd	?
+	@count	dd	?
+	@flag	dd	?

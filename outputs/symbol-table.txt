@@ -1,41 +1,18 @@
-Nombre,TipoDato,Valor,Longitud
-a1,,-,
-b1,,-,
-c1,,-,
-a2,,-,
-a,,-,
-x,,-,
-resFloat,,-,
-b,,-,
-y,,-,
-c,,-,
-d,,-,
-z,,-,
-_0,CTE_INTEGER,0,
-_-5,CTE_INTEGER,-5,
-_-9999999999,CTE_INTEGER,-9999999999,
-_1,CTE_INTEGER,1,
-_100,CTE_INTEGER,100,
-_0.1,CTE_FLOAT,0.10,
-_1.0,CTE_FLOAT,1.00,
-_22.22222,CTE_FLOAT,22.22,
-_9.000001,CTE_FLOAT,9.00,
-_99999.99,CTE_FLOAT,99999.99,
-_99.,CTE_FLOAT,99.00,
-_.9999,CTE_FLOAT,1.00,
-_-0.1,CTE_FLOAT,-0.10,
-_-1.0,CTE_FLOAT,-1.00,
-_-22.22222,CTE_FLOAT,-22.22,
-_-9.000001,CTE_FLOAT,-9.00,
-_-99999.99,CTE_FLOAT,-99999.99,
-_-99.,CTE_FLOAT,-99.00,
-_-.9999,CTE_FLOAT,-1.00,
-_@sdADaSjfla%dfg$&/8(),CTE_STRING,@sdADaSjfla%dfg$&/8(),21
-_       asldk  fh sjf ,CTE_STRING,       asldk  fh sjf ,21
-_ ,CTE_STRING, ,1
-_2146546534543,CTE_STRING,2146546534543,13
-_5,CTE_INTEGER,5,
-@aux,,-,
-@res,,-,
-@count,,-,
-@flag,,-,
+c1                                      Int                                                0         
+b1                                      Int                                                0         
+a1                                      Int                                                0         
+a2                                      String                                             0         
+resFloat                                Int                                                0         
+x                                       Int                                                0         
+a                                       Int                                                0         
+y                                       String                                             0         
+b                                       String                                             0         
+z                                       Int                                                0         
+d                                       Int                                                0         
+c                                       Int                                                0         
+_0                                      CTE_INTEGER 0                                      0         
+_-5                                     CTE_INTEGER -5                                     0         
+_-9999999999                            CTE_INTEGER -9999999999                            0         
+_1                                      CTE_INTEGER 1                                      0         
+_100                                    CTE_INTEGER 100                                    0         
+_0.1                                    CTE_FLOAT   0.10                                   0         

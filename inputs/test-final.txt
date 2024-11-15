@@ -6,7 +6,7 @@ init {
 }
 
 init {
-    a,x,resFloat : Float
+    a,x,resFloat : Int
     b,y : String
     c,d,z : Int
 }
@@ -35,7 +35,7 @@ x := -99999.99
 x := -99.
 x := -.9999
  
-y := "@sdADaSjfla%dfg$&/8()"
+y := " @sdADaS  jfla%dfg$&/8()"
 y := "       asldk  fh sjf "
 y := "1"
 y := " "

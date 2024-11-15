@@ -95,10 +95,10 @@ FUNCT_GPP           "getPenultimatePosition"
 {OP_RES}		{return OP_RES;}
 {OP_DIV}		{return OP_DIV;}
 {OP_ARIT}       {return OP_ARIT;}
-{PAREN_A}			{return PAREN_A;}
-{PAREN_C}			{return PAREN_C;}
-{LLAVE_A}            {return LLAVE_A;}
-{LLAVE_C}            {return LLAVE_C;}
+{PAREN_A}		{return PAREN_A;}
+{PAREN_C}		{return PAREN_C;}
+{LLAVE_A}       {return LLAVE_A;}
+{LLAVE_C}       {return LLAVE_C;}
 {CORCH_A}       {return CORCH_A;}
 {CORCH_C}       {return CORCH_C;}
 {COMA}          {return COMA;}

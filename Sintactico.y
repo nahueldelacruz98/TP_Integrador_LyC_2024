@@ -7,23 +7,38 @@
 #include <stdbool.h>  // Include this header for boolean variables support
 #include "y.tab.h"
 
+#include "utils/lista/lista.c"
 #include "utils/intermediate-code.c"
 #include "utils/arbol-sintactico.c"
 #include "utils/symbol-table.c"
 #include "utils/pila.c"
+
+int map_tipo_dato(const char* tipo_constante, char* tipo_dato_variable);
+int buscarTipoDato(tLista *p, void *d, char *tipo_dato, int (*comparar)(const void *, const void *));
+void generar_asm();
+void generar_asm_data(tLista *p);
+int buscarEnLista(tLista *p, void *d, char *res, 
+              int (*comparar)(const void *, const void *),
+              void (*accion)(void *, const void *));
+void copiarTipoDato(void *tipo_dato, const void *simbolo);
+
+extern char* yytext;
 
 int   yystopparser=0,
       yyerror(),
       yylex();
 
 FILE  *yyin,
-      *orden_reglas;
+      *orden_reglas,
+      *arch_symbol_table;
 
-extern char* yytext;
+tLista      list_symbol_table,
+            list_constantes;
 
 bool boolNegativeCondition = false;
 
-Pila  *pila_bloq_cod = NULL,
+Pila  *pila_conj_var = NULL,
+      *pila_bloq_cod = NULL,
       *pila_cond_mult = NULL,
       *pila_asig_arit = NULL;
 
@@ -118,6 +133,7 @@ start:
       bloque_cod1go {
             imprimir_postorden(bloq_cod_ptr);
             generar_archivo_DOT(bloq_cod_ptr);
+            generar_asm();
             liberar_arbol(bloq_cod_ptr);
       }
 
@@ -184,42 +200,57 @@ inicializacion_variables:
 
 declaracion:
       conjunto_variables DOS_PUNTOS tipo_variables {
+            char* tipo_var = desapilar(pila_conj_var);
+            while(!pila_vacia(pila_conj_var)) {
+                  Simbolo simbolo = {"", "", "", 0};
+                  strncpy(simbolo.nombre, desapilar(pila_conj_var), MAX_LENGTH - 1);
+                  strncpy(simbolo.tipo_dato, tipo_var, MAX_LENGTH - 1);
+                  //write_symbol_table(simbolo, arch_symbol_table);
+                  ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            }
             fprintf(orden_reglas, "declaracion_1\n");
       }
       | declaracion conjunto_variables DOS_PUNTOS tipo_variables {
+            char* tipo_var = desapilar(pila_conj_var);
+            while(!pila_vacia(pila_conj_var)) {
+                  Simbolo simbolo = {"", "", "", 0};
+                  strncpy(simbolo.nombre, desapilar(pila_conj_var), MAX_LENGTH - 1);
+                  strncpy(simbolo.tipo_dato, tipo_var, MAX_LENGTH - 1);
+                  //write_symbol_table(simbolo, arch_symbol_table);
+                  ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            }
             fprintf(orden_reglas, "declaracion_2\n");
       }
 	;
 
 conjunto_variables:
       conjunto_variables COMA ID {
-            Simbolo simbolo = {"", "", "-", 0};
-            strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
-            write_symbol_table(simbolo);
+            apilar(pila_conj_var, $3);
             
             fprintf(orden_reglas, "conjunto_variables_1\n");
-            printf(",%s",yytext);
+            printf(",%s", $3);
       }
       | ID {
-            Simbolo simbolo = {"", "", "-", 0};
-            strncpy(simbolo.nombre, yytext, MAX_LENGTH - 1);
-            write_symbol_table(simbolo);
+            apilar(pila_conj_var, $1);
 
             fprintf(orden_reglas, "conjunto_variables_2\n");
-            printf("%s", yytext);
+            printf("%s", $1);
       }
       ;
          
 tipo_variables:
       DECL_STRING {
+            apilar(pila_conj_var, yytext);
             fprintf(orden_reglas, "tipo_variables_1\n");
             printf(": variable/s de tipo String.\n"); 
       }
       | DECL_FLOAT {
+            apilar(pila_conj_var, yytext);
             fprintf(orden_reglas, "tipo_variables_2\n");
             printf(": variable/s de tipo Float.\n"); 
       }
       | DECL_INT {
+            apilar(pila_conj_var, yytext);
             fprintf(orden_reglas, "tipo_variables_3\n");
             printf(": variable/s de tipo Integer.\n"); 
       }
@@ -227,7 +258,27 @@ tipo_variables:
 
 asignacion_variables:
       ID OP_AS constante {
-            asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_ptr);
+            Simbolo simbolo_id = {"", "", "", 0};
+            Simbolo simbolo_const;
+
+            strcpy(simbolo_id.nombre, $1);
+            sacarUltimoLista(&list_constantes, &simbolo_const, sizeof(Simbolo));
+
+            //buscarTipoDato(&list_symbol_table, &simbolo_id, simbolo_id.tipo_dato, compararNombre);
+            buscarEnLista(&list_symbol_table, &simbolo_id, simbolo_id.tipo_dato, compararNombre, copiarTipoDato);
+
+            printf("----------------------------------------\n");
+            mostrarSimbolo(&simbolo_id, stdout);
+            mostrarSimbolo(&simbolo_const, stdout);
+            printf("----------------------------------------\n");
+
+            if(compararTipoDato(&simbolo_const, &simbolo_id)) {
+                  asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_ptr);
+            } else {
+                  printf("Error, el tipo de dato no es el esperado: variable tipo '%s', constante tipo '%s'\n", simbolo_id.tipo_dato, simbolo_const.tipo_dato);
+                  exit(1);
+            }
+
             fprintf(orden_reglas, "asignacion_variables_1\n");
             printf("%s se le asigna constante: %s", $1, yytext);
       }
@@ -246,9 +297,11 @@ constante:
             Simbolo simbolo = {"", "CTE_INTEGER", "", 0};
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
-            write_symbol_table(simbolo);
+            //write_symbol_table(simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
 
-            const_ptr = crear_hoja($1);
+            const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_1\n");
       }
       | CONST_FLOAT {
@@ -256,9 +309,11 @@ constante:
             snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));
-            write_symbol_table(simbolo);
+            //write_symbol_table(simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
 
-            const_ptr = crear_hoja($1);
+            const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_2\n");
       }
       | CONST_STRING {
@@ -268,9 +323,11 @@ constante:
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.nombre, MAX_LENGTH, "_%.*s", len, yytext + 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.*s", len, yytext + 1);
-            write_symbol_table(simbolo);
+            //write_symbol_table(simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
 
-            const_ptr = crear_hoja($1);
+            const_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "constante_3\n");
       }
       ;
@@ -285,7 +342,6 @@ while:
             fprintf(orden_reglas, "while_2\n");
       }
       ;
-
 
 if:
       START_IF PAREN_A condicion_multiple PAREN_C LLAVE_A bloque_cod1go LLAVE_C {
@@ -361,6 +417,9 @@ valores_admitidos_condicion:
             printf("ID");
       }
       | constante {
+            Simbolo simbolo_const; //TODO
+            sacarUltimoLista(&list_constantes, &simbolo_const, sizeof(Simbolo)); //TODO
+
             val_adm_cond_ptr = const_ptr;
             fprintf(orden_reglas, "valores_admitidos_condicion_2\n");
             printf("CONSTANTE");
@@ -554,17 +613,19 @@ gpp_lista_aritmetica:
                         *aux_nodo,
                         *res_nodo,
                         *cuerpo_nodo;
-            Simbolo     aux_simbolo = {"@aux", "", "-", 0},
-                        res_simbolo = {"@res", "", "-", 0};
+            Simbolo     aux_simbolo = {"@aux", "CTE_INTEGER", "", 0},
+                        res_simbolo = {"@res", "CTE_INTEGER", "", 0};
 
             //aux = yytext;
-            write_symbol_table(aux_simbolo);
+            //write_symbol_table(aux_simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &aux_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             aux_hoja = crear_hoja("@aux");
             yytext_hoja = crear_hoja(yytext);
             aux_nodo = crear_nodo(":=", aux_hoja, yytext_hoja);
 
             //res = NULL;
-            write_symbol_table(res_simbolo);
+            //write_symbol_table(res_simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &res_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             res_hoja = crear_hoja("@res");
             res_nodo = crear_nodo(":=", res_hoja, crear_hoja("NULL"));
 
@@ -639,21 +700,24 @@ bc_lista_aritmetica:
                         *cuerpo_if_flag_nodo,
                         *count_nodo,
                         *auxiliar_nodo;
-            Simbolo     count_simbolo = {"@count", "", "-", 0},
-                        aux_simbolo = {"@aux", "", "-", 0},
-                        flag_simbolo = {"@flag", "", "-", 0};
+            Simbolo     count_simbolo = {"@count", "CTE_INTEGER", "", 0},
+                        aux_simbolo = {"@aux", "CTE_INTEGER", "", 0},
+                        flag_simbolo = {"@flag", "CTE_INTEGER", "", 0};
             
             //bc_list_arit_ptr = var_arit_ptr;
             //count = 0;
-            write_symbol_table(count_simbolo);
+            //write_symbol_table(count_simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &count_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             auxiliar_nodo = crear_nodo(":=", crear_hoja("@count"), crear_hoja("0"));
             
             //aux = yytext;
-            write_symbol_table(aux_simbolo);
+            //write_symbol_table(aux_simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &aux_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
 
             //flag = 0;
-            write_symbol_table(flag_simbolo);
+            //write_symbol_table(flag_simbolo, arch_symbol_table);
+            ponerAlFinalYEscribir(&list_symbol_table, &flag_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("1"));
 
             //      res := aux % 10;
@@ -782,9 +846,11 @@ bc_lista_aritmetica:
 
 %%
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
       orden_reglas = fopen("outputs/orden-reglas.txt", "wt");
+      crear_lista(&list_symbol_table);
+      crear_lista(&list_constantes);
+      pila_conj_var = crear_pila();
       pila_asig_arit = crear_pila();
       pila_bloq_cod = crear_pila();
       pila_cond_mult = crear_pila();
@@ -792,22 +858,81 @@ int main(int argc, char *argv[])
             printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
             return 1;
       }
-      open_symbol_table();
+      //open_symbol_table(arch_symbol_table);
+      arch_symbol_table = fopen(NAME_SYMBOL_TABLE_FILE, "wt");
       create_intermediate_code();
       yyparse();
 
-      close_symbol_table();
+      close_symbol_table(arch_symbol_table);
       close_intermediate_code();
 	fclose(yyin);
       fclose(orden_reglas);
+      liberar_pila(pila_conj_var);
       liberar_pila(pila_asig_arit);
       liberar_pila(pila_bloq_cod);
       liberar_pila(pila_cond_mult);
+      
+      printf("LISTA:\n");
+      mostrarLista(&list_symbol_table, mostrarSimbolo);
+      vaciarLista(&list_symbol_table);
+      vaciarLista(&list_constantes);
 
       return 0;
 }
 
 int yyerror(void) {
       printf("Error Sintactico\n");
-      exit (1);
+      exit(1);
+}
+
+int buscarEnLista(tLista *p, void *d, char *res, 
+              int (*comparar)(const void *, const void *),
+              void (*accion)(void *, const void *)) {
+      while(*p) {
+            if(comparar((*p)->info, d) == 0) {
+                  if(accion)
+                        accion(res, (*p)->info);
+                  return 0;
+            }
+            p = &(*p)->sig;
+      }
+
+      return 1;
+}
+
+void copiarTipoDato(void *tipo_dato, const void *simbolo) {
+      strcpy(tipo_dato, ((Simbolo *)simbolo)->tipo_dato);
+}
+
+int buscarTipoDato(tLista *p, void *d, char *tipo_dato, int (*comparar)(const void *, const void *)){
+      while(*p) {
+            if(comparar((*p)->info, d) == 0) {
+                  strcpy(tipo_dato, ((Simbolo *)(*p)->info)->tipo_dato);
+                  return 0;
+            }
+            p = &(*p)->sig;
+      }
+
+      return 1; // NO ENCONTRADO
+}
+
+void generar_asm() {
+      generar_asm_data(&list_symbol_table);
+}
+
+void generar_asm_data(tLista *p) {
+      FILE *pf = fopen("outputs/asm.txt", "wt");
+      list_symbol_table;
+
+      fprintf(pf, ".DATA\n");
+
+      while(*p){
+            //mostrar((*p)->info, stdout);
+            fprintf(pf, "\t%s\tdd\t%s\n", 
+                    ((Simbolo *)(*p)->info)->nombre,
+                    strcmp(((Simbolo *)(*p)->info)->valor, "") ? ((Simbolo *)(*p)->info)->valor : "?" );
+
+            p = &(*p)->sig;
+      }
+      fclose(pf);
 }

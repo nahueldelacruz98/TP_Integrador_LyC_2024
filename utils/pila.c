@@ -10,8 +10,8 @@ typedef struct {
 } Pila;
 
 Pila* crear_pila();
-int es_vacia(Pila* pila);
-int es_llena(Pila* pila);
+int pila_vacia(Pila* pila);
+int pila_llena(Pila* pila);
 void apilar(Pila* pila, void* valor);
 void* desapilar(Pila* pila);
 
@@ -27,28 +27,27 @@ Pila* crear_pila() {
 }
 
 // Función para verificar si la pila está vacía
-int es_vacia(Pila* pila) {
+int pila_vacia(Pila* pila) {
     return pila->tope == -1;
 }
 
 // Función para verificar si la pila está llena
-int es_llena(Pila* pila) {
+int pila_llena(Pila* pila) {
     return pila->tope == MAX - 1;
 }
 
 // Función para apilar un puntero
 void apilar(Pila* pila, void* valor) {
-    if (es_llena(pila)) {
+    if (pila_llena(pila)) {
         printf("La pila está llena, no se puede apilar\n");
         return;
     }
     pila->elementos[++(pila->tope)] = valor;
-    printf("Elemento apilado en la pila\n");
 }
 
 // Función para desapilar un puntero
 void* desapilar(Pila* pila) {
-    if (es_vacia(pila)) {
+    if (pila_vacia(pila)) {
         printf("La pila está vacía, no se puede desapilar\n");
         return NULL;
     }
@@ -56,7 +55,7 @@ void* desapilar(Pila* pila) {
 }
 
 void mostrar_pila(Pila* pila) {
-    if (es_vacia(pila)) {
+    if (pila_vacia(pila)) {
         printf("La pila está vacía\n");
         return;
     }
