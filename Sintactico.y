@@ -13,14 +13,8 @@
 #include "utils/symbol-table.c"
 #include "utils/pila.c"
 
-int map_tipo_dato(const char* tipo_constante, char* tipo_dato_variable);
-int buscarTipoDato(tLista *p, void *d, char *tipo_dato, int (*comparar)(const void *, const void *));
 void generar_asm();
 void generar_asm_data(tLista *p);
-int buscarEnLista(tLista *p, void *d, char *res, 
-              int (*comparar)(const void *, const void *),
-              void (*accion)(void *, const void *));
-void copiarTipoDato(void *tipo_dato, const void *simbolo);
 
 extern char* yytext;
 
@@ -205,8 +199,10 @@ declaracion:
                   Simbolo simbolo = {"", "", "", 0};
                   strncpy(simbolo.nombre, desapilar(pila_conj_var), MAX_LENGTH - 1);
                   strncpy(simbolo.tipo_dato, tipo_var, MAX_LENGTH - 1);
-                  //write_symbol_table(simbolo, arch_symbol_table);
-                  ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+                  if(ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo) ==  CLA_DUP) {
+                        printf("Error, la variable '%s' ya fue declarada.\n", simbolo.nombre);
+                        return 1;
+                  }
             }
             fprintf(orden_reglas, "declaracion_1\n");
       }
@@ -216,8 +212,10 @@ declaracion:
                   Simbolo simbolo = {"", "", "", 0};
                   strncpy(simbolo.nombre, desapilar(pila_conj_var), MAX_LENGTH - 1);
                   strncpy(simbolo.tipo_dato, tipo_var, MAX_LENGTH - 1);
-                  //write_symbol_table(simbolo, arch_symbol_table);
-                  ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+                  if(ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo) ==  CLA_DUP) {
+                        printf("Error, la variable '%s' ya fue declarada.\n", simbolo.nombre);
+                        return 1;
+                  }
             }
             fprintf(orden_reglas, "declaracion_2\n");
       }
@@ -264,8 +262,10 @@ asignacion_variables:
             strcpy(simbolo_id.nombre, $1);
             sacarUltimoLista(&list_constantes, &simbolo_const, sizeof(Simbolo));
 
-            //buscarTipoDato(&list_symbol_table, &simbolo_id, simbolo_id.tipo_dato, compararNombre);
-            buscarEnLista(&list_symbol_table, &simbolo_id, simbolo_id.tipo_dato, compararNombre, copiarTipoDato);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, simbolo_id.tipo_dato, compararNombre, copiarTipoDato)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
 
             printf("----------------------------------------\n");
             mostrarSimbolo(&simbolo_id, stdout);
@@ -275,18 +275,32 @@ asignacion_variables:
             if(compararTipoDato(&simbolo_const, &simbolo_id)) {
                   asig_var_ptr = crear_nodo(":=", crear_hoja($1), const_ptr);
             } else {
-                  printf("Error, el tipo de dato no es el esperado: variable tipo '%s', constante tipo '%s'\n", simbolo_id.tipo_dato, simbolo_const.tipo_dato);
-                  exit(1);
+                  printf("Error, el tipo de dato no es el esperado: variable tipo '%s', constante tipo '%s'.\n", simbolo_id.tipo_dato, simbolo_const.tipo_dato);
+                  return 1;
             }
 
             fprintf(orden_reglas, "asignacion_variables_1\n");
             printf("%s se le asigna constante: %s", $1, yytext);
       }
       | ID OP_AS get_penultimate_position {
+            Simbolo simbolo_id = {"", "", "", 0};
+            strcpy(simbolo_id.nombre, $1);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, NULL, compararNombre, NULL)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
+
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), get_pen_pos_ptr);
             fprintf(orden_reglas, "asignacion_variables_2\n");
       }
       | ID OP_AS binary_count {
+            Simbolo simbolo_id = {"", "", "", 0};
+            strcpy(simbolo_id.nombre, $1);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, NULL, compararNombre, NULL)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
+
             asig_var_ptr = crear_nodo(":=", crear_hoja($1), bin_count_ptr);
             fprintf(orden_reglas, "asignacion_variables_3\n");
       }
@@ -412,6 +426,13 @@ condicion:
       
 valores_admitidos_condicion:
       ID {
+            Simbolo simbolo_id = {"", "", "", 0};
+            strcpy(simbolo_id.nombre, $1);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, simbolo_id.tipo_dato, compararNombre, copiarTipoDato)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
+
             val_adm_cond_ptr = crear_hoja($1);
             fprintf(orden_reglas, "valores_admitidos_condicion_1\n");
             printf("ID");
@@ -491,6 +512,13 @@ comparador:
 
 asignacion_aritmetica:
       ID OP_ARIT expresion {
+            Simbolo simbolo_id = {"", "", "", 0};
+            strcpy(simbolo_id.nombre, $1);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, NULL, compararNombre, NULL)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
+
             asig_arit_ptr = crear_nodo("=:", crear_hoja($1), expr_ptr);
             fprintf(orden_reglas, "asignacion_aritmetica_1\n");
       }
@@ -555,6 +583,13 @@ factor:
 
 variable_aritmetica:
       ID {
+            Simbolo simbolo_id = {"", "", "", 0};
+            strcpy(simbolo_id.nombre, $1);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, NULL, compararNombre, NULL)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
+
             var_arit_ptr = crear_hoja($1);
             fprintf(orden_reglas, "variable_aritmetica_1\n");
       }
@@ -570,6 +605,13 @@ variable_aritmetica:
 
 lectura:
       START_LECTURA PAREN_A ID PAREN_C {
+            Simbolo simbolo_id = {"", "", "", 0};
+            strcpy(simbolo_id.nombre, $3);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, NULL, compararNombre, NULL)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
+
             lect_ptr = crear_nodo("-LECTURA-", crear_hoja("read"), crear_hoja($3));
             fprintf(orden_reglas, "lectura_1\n");
             printf("Comienzo de lectura. Guardar resultado en ID.\n");
@@ -583,6 +625,13 @@ escritura:
             printf("Comienzo de escritura de constante STRING.\n");
       }
       | START_ESCRITURA PAREN_A ID PAREN_C {
+            Simbolo simbolo_id = {"", "", "", 0};
+            strcpy(simbolo_id.nombre, $3);
+            if(buscarEnLista(&list_symbol_table, &simbolo_id, NULL, compararNombre, NULL)) {
+                  printf("Error, la variable '%s' no fue declarada.\n", simbolo_id.nombre);
+                  return 1;
+            }
+
             escr_ptr = crear_nodo("-ESCRITURA-", crear_hoja("write"), crear_hoja($3));
             fprintf(orden_reglas, "escritura_2\n");
             printf("Comienzo de escritura de valor de ID.\n");
@@ -882,38 +931,7 @@ int main(int argc, char *argv[]) {
 
 int yyerror(void) {
       printf("Error Sintactico\n");
-      exit(1);
-}
-
-int buscarEnLista(tLista *p, void *d, char *res, 
-              int (*comparar)(const void *, const void *),
-              void (*accion)(void *, const void *)) {
-      while(*p) {
-            if(comparar((*p)->info, d) == 0) {
-                  if(accion)
-                        accion(res, (*p)->info);
-                  return 0;
-            }
-            p = &(*p)->sig;
-      }
-
       return 1;
-}
-
-void copiarTipoDato(void *tipo_dato, const void *simbolo) {
-      strcpy(tipo_dato, ((Simbolo *)simbolo)->tipo_dato);
-}
-
-int buscarTipoDato(tLista *p, void *d, char *tipo_dato, int (*comparar)(const void *, const void *)){
-      while(*p) {
-            if(comparar((*p)->info, d) == 0) {
-                  strcpy(tipo_dato, ((Simbolo *)(*p)->info)->tipo_dato);
-                  return 0;
-            }
-            p = &(*p)->sig;
-      }
-
-      return 1; // NO ENCONTRADO
 }
 
 void generar_asm() {

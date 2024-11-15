@@ -1,28 +1,33 @@
 #include "lista.h"
 
-#define minimo(X,Y) ((X) <= (Y) ? (X) : (Y))
+#define minimo(X, Y) ((X) <= (Y) ? (X) : (Y))
 #define CON_MSJ 1
 
-void crear_lista(tLista *p){
+void crear_lista(tLista *p)
+{
     *p = NULL;
 }
 
-int listaVacia(const tLista *p){
+int listaVacia(const tLista *p)
+{
     return *p == NULL;
 }
 
-int listaLlena(const tLista *p, unsigned cantBytes){
-    tNodo   *aux = (tNodo *)malloc(sizeof(tNodo));
-    void    *info = malloc(cantBytes);
+int listaLlena(const tLista *p, unsigned cantBytes)
+{
+    tNodo *aux = (tNodo *)malloc(sizeof(tNodo));
+    void *info = malloc(cantBytes);
 
     free(aux);
     free(info);
     return aux == NULL || info == NULL;
 }
 
-int vaciarLista(tLista *p){
+int vaciarLista(tLista *p)
+{
     int cant = 0;
-    while(*p){
+    while (*p)
+    {
         tNodo *aux = *p;
 
         cant++;
@@ -33,11 +38,13 @@ int vaciarLista(tLista *p){
     return cant;
 }
 
-int ponerAlComienzo(tLista *p, const void *d, unsigned cantBytes){
+int ponerAlComienzo(tLista *p, const void *d, unsigned cantBytes)
+{
     tNodo *nue;
 
-    if((nue = (tNodo *)malloc(sizeof(tNodo))) == NULL ||
-        (nue->info = malloc (cantBytes)) == NULL) {
+    if ((nue = (tNodo *)malloc(sizeof(tNodo))) == NULL ||
+        (nue->info = malloc(cantBytes)) == NULL)
+    {
         free(nue);
         return 0;
     }
@@ -48,10 +55,12 @@ int ponerAlComienzo(tLista *p, const void *d, unsigned cantBytes){
     return 1;
 }
 
-int sacarPrimeroLista(tLista *p, void *d, unsigned cantBytes){
+int sacarPrimeroLista(tLista *p, void *d, unsigned cantBytes)
+{
     tNodo *aux = *p;
 
-    if(aux == NULL){
+    if (aux == NULL)
+    {
         return 0;
     }
     *p = aux->sig;
@@ -61,65 +70,78 @@ int sacarPrimeroLista(tLista *p, void *d, unsigned cantBytes){
     return 1;
 }
 
-int verPrimeroLista(const tLista *p, void *d, unsigned cantBytes){
-    if(*p == NULL){
+int verPrimeroLista(const tLista *p, void *d, unsigned cantBytes)
+{
+    if (*p == NULL)
+    {
         return 0;
     }
     memcpy(d, (*p)->info, minimo(cantBytes, (*p)->tamInfo));
     return 1;
 }
 
-int ponerAlFinal(tLista *p, const void *d, unsigned cantBytes){
+int ponerAlFinal(tLista *p, const void *d, unsigned cantBytes)
+{
     tNodo *nue;
 
-    while(*p){
+    while (*p)
+    {
         p = &(*p)->sig;
     }
-    if((nue = (tNodo *)malloc(sizeof(tNodo))) == NULL ||
-       (nue->info = malloc(cantBytes)) == NULL){
+    if ((nue = (tNodo *)malloc(sizeof(tNodo))) == NULL ||
+        (nue->info = malloc(cantBytes)) == NULL)
+    {
         free(nue);
-        return 0;
+        return 1;
     }
     memcpy(nue->info, d, cantBytes);
     nue->tamInfo = cantBytes;
     nue->sig = NULL;
     *p = nue;
-    return 1;
+    return 0;
 }
 
-int sacarUltimoLista(tLista *p, void *d, unsigned cantBytes){
-    if(*p == NULL){
-        return 0;
+int sacarUltimoLista(tLista *p, void *d, unsigned cantBytes)
+{
+    if (*p == NULL)
+    {
+        return 1;
     }
-    while((*p)->sig){
+    while ((*p)->sig)
+    {
         p = &(*p)->sig;
     }
     memcpy(d, (*p)->info, minimo(cantBytes, (*p)->tamInfo));
     free((*p)->info);
     free(*p);
     *p = NULL;
-    return 1;
+    return 0;
 }
 
-int verUltimoLista(const tLista *p, void *d, unsigned cantBytes){
-    if(*p == NULL){
-        return 0;
+int verUltimoLista(const tLista *p, void *d, unsigned cantBytes)
+{
+    if (*p == NULL)
+    {
+        return 1;
     }
-    while((*p)->sig){
+    while ((*p)->sig)
+    {
         p = &(*p)->sig;
     }
     memcpy(d, (*p)->info, minimo(cantBytes, (*p)->tamInfo));
-    return 1;
+    return 0;
 }
 
-int vaciarListaYMostrar(tLista *p, void (*mostrar)(const void *, FILE *), FILE *fp){
+int vaciarListaYMostrar(tLista *p, void (*mostrar)(const void *, FILE *), FILE *fp)
+{
     int cant = 0;
-    while(*p){
+    while (*p)
+    {
         tNodo *aux = *p;
 
         cant++;
         *p = aux->sig;
-        if(mostrar && fp)
+        if (mostrar && fp)
             mostrar(aux->info, fp);
         free(aux->info);
         free(aux);
@@ -128,23 +150,26 @@ int vaciarListaYMostrar(tLista *p, void (*mostrar)(const void *, FILE *), FILE *
 }
 
 int ponerAlFinalYEscribir(tLista *p, const void *d, unsigned cantBytes, FILE *fp,
-                          int(* comparar)(const void *, const void *),
-                          void(* escribir)(const void *, FILE *)) {
+                          int (*comparar)(const void *, const void *),
+                          void (*escribir)(const void *, FILE *))
+{
     tNodo *nue;
 
-    while(*p) {
-        if(comparar((*p)->info, d) == 0) {
-            printf("clave dup");
+    while (*p)
+    {
+        if (comparar((*p)->info, d) == 0)
+        {
             return CLA_DUP;
         }
-        
+
         p = &(*p)->sig;
     }
 
-    if((nue = (tNodo *)malloc(sizeof(tNodo))) == NULL ||
-       (nue->info = malloc(cantBytes)) == NULL) {
+    if ((nue = (tNodo *)malloc(sizeof(tNodo))) == NULL ||
+        (nue->info = malloc(cantBytes)) == NULL)
+    {
         free(nue);
-        return 0;
+        return 1;
     }
 
     memcpy(nue->info, d, cantBytes);
@@ -153,12 +178,32 @@ int ponerAlFinalYEscribir(tLista *p, const void *d, unsigned cantBytes, FILE *fp
     *p = nue;
 
     escribir((*p)->info, fp);
-    return 1;
+    return 0;
 }
 
-void mostrarLista(tLista *p, void (*mostrar)(const void *d, FILE *fp)){
-      while(*p){
-            mostrar((*p)->info, stdout);
-            p = &(*p)->sig;
-      }
+void mostrarLista(tLista *p, void (*mostrar)(const void *d, FILE *fp))
+{
+    while (*p)
+    {
+        mostrar((*p)->info, stdout);
+        p = &(*p)->sig;
+    }
+}
+
+int buscarEnLista(tLista *p, void *d, char *res,
+                  int (*comparar)(const void *, const void *),
+                  void (*accion)(void *, const void *))
+{
+    while (*p)
+    {
+        if (comparar((*p)->info, d) == 0)
+        {
+            if (accion)
+                accion(res, (*p)->info);
+            return 0;
+        }
+        p = &(*p)->sig;
+    }
+
+    return 1; // No encontrado
 }

@@ -33,5 +33,8 @@ int ponerAlFinalYEscribir(tLista *p, const void *d, unsigned cantBytes, FILE *fp
 int vaciarListaYMostrar(tLista *p,
                         void (*mostrar)(const void *, FILE *), FILE *fp);
 void mostrarLista(tLista *p, void (*mostrar)(const void *, FILE *));
+int buscarEnLista(tLista *p, void *d, char *res, 
+              int (*comparar)(const void *, const void *),
+              void (*accion)(void *, const void *));
 
 #endif // LISTA_H_INCLUDED

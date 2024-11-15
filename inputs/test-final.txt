@@ -2,7 +2,7 @@
 
 init {
     a1,b1,c1 : Int
-    a2 : String
+    a2,a1 : String
 }
 
 init {

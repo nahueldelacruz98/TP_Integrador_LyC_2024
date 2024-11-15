@@ -24,6 +24,7 @@ int close_symbol_table(FILE *fp);
 void mostrarSimbolo(const void *simb, FILE *fp);
 int compararNombre(const void *d1, const void *d2);
 int compararTipoDato(const Simbolo *simbolo_const, const Simbolo *simbolo_id);
+void copiarTipoDato(void *tipo_dato, const void *simbolo);
 
 int open_symbol_table(FILE *fp)
 {
@@ -141,4 +142,9 @@ int compararNombre(const void *d1, const void *d2)
 {
     return strcmp(((const Simbolo *)d1)->nombre,
                   ((const Simbolo *)d2)->nombre);
+}
+
+void copiarTipoDato(void *tipo_dato, const void *simbolo)
+{
+    strcpy(tipo_dato, ((Simbolo *)simbolo)->tipo_dato);
 }
