@@ -312,7 +312,9 @@ constante:
       }
       | CONST_FLOAT {
             Simbolo simbolo = {"", "CTE_FLOAT", "", 0};
-            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
+            char buffer[MAX_LENGTH];
+            normalizarNombreFloat(yytext, buffer);
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", buffer);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
@@ -323,11 +325,15 @@ constante:
       }
       | CONST_STRING {
             int len = ((int) strlen(yytext)) - 2;
-            Simbolo simbolo = {"", "CTE_STRING", "", len};
-            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
+            Simbolo simbolo = {"", "CTE_STRING", "", 0};
+            char buffer[MAX_LENGTH];
+
+            normalizarNombreString(yytext, buffer);
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", buffer);
             strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
-            snprintf(simbolo.nombre, MAX_LENGTH, "_%.*s", len, yytext + 1);
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%.*s", len, buffer + 1);
             snprintf(simbolo.valor, MAX_LENGTH, "%.*s", len, yytext + 1);
+            simbolo.longitud = len; //TODO: desbordamiento?
             ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             ponerAlFinal(&list_constantes, &simbolo, sizeof(Simbolo));
 
@@ -625,11 +631,24 @@ variable_aritmetica:
             fprintf(orden_reglas, "variable_aritmetica_1\n");
       }
       | CONST_FLOAT {
-            var_arit_ptr = crear_hoja($1);
+            Simbolo simbolo = {"", "CTE_FLOAT", "", 0};
+            char buffer[MAX_LENGTH];
+            normalizarNombreFloat(yytext, buffer);
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", buffer);
+            strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
+            snprintf(simbolo.valor, MAX_LENGTH, "%.2f", strtof(simbolo.valor, NULL));
+            ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            
+            var_arit_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "variable_aritmetica_2\n");
       }
       | CONST_INT {
-            var_arit_ptr = crear_hoja($1);
+            Simbolo simbolo = {"", "CTE_INTEGER", "", 0};
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", yytext);
+            strncpy(simbolo.valor, yytext, MAX_LENGTH - 1);
+            ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            
+            var_arit_ptr = crear_hoja(simbolo.nombre);
             fprintf(orden_reglas, "variable_aritmetica_3\n");
       }
       ;
@@ -651,7 +670,19 @@ lectura:
 
 escritura:
       START_ESCRITURA PAREN_A CONST_STRING PAREN_C  {
-            escr_ptr = crear_nodo("-ESCRITURA-", crear_hoja("write"), crear_hoja($3));
+            int len = ((int) strlen($3)) - 2;
+            Simbolo simbolo = {"", "CTE_STRING", "", 0};
+            char buffer[MAX_LENGTH];
+
+            normalizarNombreString($3, buffer);
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%s", buffer);
+            strncpy(simbolo.valor, $3, MAX_LENGTH - 1);
+            snprintf(simbolo.nombre, MAX_LENGTH, "_%.*s", len, buffer + 1);
+            snprintf(simbolo.valor, MAX_LENGTH, "%.*s", len, $3 + 1);
+            simbolo.longitud = len; //TODO: desbordamiento?
+            ponerAlFinalYEscribir(&list_symbol_table, &simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+
+            escr_ptr = crear_nodo("-ESCRITURA-", crear_hoja("write"), crear_hoja(simbolo.nombre));
             fprintf(orden_reglas, "escritura_1\n");
             printf("Comienzo de escritura de constante STRING.\n");
       }
@@ -693,19 +724,25 @@ gpp_lista_aritmetica:
                         *aux_nodo,
                         *res_nodo,
                         *cuerpo_nodo;
-            Simbolo     aux_simbolo = {"@aux", "CTE_INTEGER", "", 0},
-                        res_simbolo = {"@res", "CTE_INTEGER", "", 0};
+            Simbolo     aux_simbolo = {"@aux", "Int", "", 0},
+                        res_simbolo = {"@res", "Int", "", 0},
+                        null_simbolo = {"_NULL", "CTE_INTEGER", "0", 0};
+
+            char yytext_nombre [MAX_LENGTH]; // _yytext
+            snprintf(yytext_nombre, MAX_LENGTH, "_%s", yytext);
+            normalizarNombreFloat(yytext_nombre, yytext_nombre);
+            ponerAlFinalYEscribir(&list_symbol_table, &null_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
 
             //aux = yytext;
             ponerAlFinalYEscribir(&list_symbol_table, &aux_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             aux_hoja = crear_hoja("@aux");
-            yytext_hoja = crear_hoja(yytext);
+            yytext_hoja = crear_hoja(yytext_nombre);
             aux_nodo = crear_nodo(":=", aux_hoja, yytext_hoja);
 
             //res = NULL;
             ponerAlFinalYEscribir(&list_symbol_table, &res_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
             res_hoja = crear_hoja("@res");
-            res_nodo = crear_nodo(":=", res_hoja, crear_hoja("NULL"));
+            res_nodo = crear_nodo(":=", res_hoja, crear_hoja(null_simbolo.nombre));
 
             //gpp_list_arit_ptr = var_arit_ptr;
             cuerpo_nodo = crear_nodo("-CUERPO-", aux_nodo, res_nodo);
@@ -722,6 +759,10 @@ gpp_lista_aritmetica:
                         *res_nodo,
                         *cuerpo_nodo;
 
+            char yytext_nombre [MAX_LENGTH]; // _yytext
+            snprintf(yytext_nombre, MAX_LENGTH, "_%s", yytext);
+            normalizarNombreFloat(yytext_nombre, yytext_nombre);
+
             //res = aux;
             res_hoja = crear_hoja("@res");
             aux_hoja = crear_hoja("@aux");
@@ -729,7 +770,7 @@ gpp_lista_aritmetica:
 
             //aux = yytext;
             aux2_hoja = crear_hoja("@aux");
-            yytext_hoja = crear_hoja(yytext);
+            yytext_hoja = crear_hoja(yytext_nombre);
             aux2_nodo = crear_nodo(":=", aux2_hoja, yytext_hoja);
 
             cuerpo_nodo = crear_nodo("-CUERPO-", res_nodo, aux2_nodo);
@@ -778,58 +819,70 @@ bc_lista_aritmetica:
                         *cuerpo_if_flag_nodo,
                         *count_nodo,
                         *auxiliar_nodo;
-            Simbolo     count_simbolo = {"@count", "CTE_INTEGER", "", 0},
-                        aux_simbolo = {"@aux", "CTE_INTEGER", "", 0},
-                        flag_simbolo = {"@flag", "CTE_INTEGER", "", 0};
+            Simbolo     count_simbolo = {"@count", "Int", "", 0},
+                        aux_simbolo = {"@aux", "Int", "", 0},
+                        flag_simbolo = {"@flag", "Int", "", 0},
+                        res_simbolo = {"@res", "Int", "", 0},
+                        cero_simbolo = {"_0", "CTE_INTEGER", "0", 0},
+                        uno_simbolo = {"_1", "CTE_INTEGER", "1", 0},
+                        diez_simbolo = {"_10", "CTE_INTEGER", "10", 0};
+
+            char yytext_nombre [MAX_LENGTH]; // _yytext
+            snprintf(yytext_nombre, MAX_LENGTH, "_%s", yytext);
             
+            ponerAlFinalYEscribir(&list_symbol_table, &res_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            ponerAlFinalYEscribir(&list_symbol_table, &cero_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            ponerAlFinalYEscribir(&list_symbol_table, &uno_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+            ponerAlFinalYEscribir(&list_symbol_table, &diez_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
+
             //bc_list_arit_ptr = var_arit_ptr;
             //count = 0;
             ponerAlFinalYEscribir(&list_symbol_table, &count_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
-            auxiliar_nodo = crear_nodo(":=", crear_hoja("@count"), crear_hoja("0"));
+            auxiliar_nodo = crear_nodo(":=", crear_hoja("@count"), crear_hoja(cero_simbolo.nombre));
             
             //aux = yytext;
             ponerAlFinalYEscribir(&list_symbol_table, &aux_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
-            asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
+            asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext_nombre));
 
             //flag = 0;
             ponerAlFinalYEscribir(&list_symbol_table, &flag_simbolo, sizeof(Simbolo), arch_symbol_table, compararNombre, mostrarSimbolo);
-            flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("1"));
+            flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja(uno_simbolo.nombre));
 
-            //      res := aux % 10;
-            res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("10"));
-            res_nodo = crear_nodo(":=", crear_hoja("@res"), res_nodo);
+            //      res =: aux % 10;
+            res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("_10"));
+            res_nodo = crear_nodo("=:", crear_hoja("@res"), res_nodo);
             
-            //      if(res <> 0 | res <> 1)
-            condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
-            condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
-            condif3_nodo = crear_nodo("OR", condif1_nodo, condif2_nodo);
+            //      if(res <> 0 && res <> 1)
+            condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja(cero_simbolo.nombre));
+            condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja(uno_simbolo.nombre));
+            condif3_nodo = crear_nodo("AND", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
-            flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
+            flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja(cero_simbolo.nombre));
 
             if_nodo = crear_nodo("-IF-", condif3_nodo, flag_0_nodo);
 
-            //      aux := aux / 10;
-            aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
-            aux_nodo = crear_nodo(":=", crear_hoja("@aux"), aux_nodo);
+            //      aux =: aux / 10;
+            aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja(diez_simbolo.nombre));
+            aux_nodo = crear_nodo("=:", crear_hoja("@aux"), aux_nodo);
 
             cuerpo_if_nodo = crear_nodo("-CUERPO-", if_nodo, aux_nodo);
             cuerpo_res_nodo = crear_nodo("-CUERPO-", res_nodo, cuerpo_if_nodo);
 
             //while(aux > 0):
-            condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
+            condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja(cero_simbolo.nombre));
             condwhile_nodo = crear_nodo("-WHILE-", condwhile_nodo, cuerpo_res_nodo);
 
-            //aux := aux / 10;
-            aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
-            aux2_nodo = crear_nodo(":=", crear_hoja("@aux"), aux2_nodo);
+            //aux =: aux / 10;
+            aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja(diez_simbolo.nombre));
+            aux2_nodo = crear_nodo("=:", crear_hoja("@aux"), aux2_nodo);
 
             //if(flag == 1)
-            cond_if_flag_nodo = crear_nodo("==", crear_hoja("@flag"), crear_hoja("1"));
+            cond_if_flag_nodo = crear_nodo("==", crear_hoja("@flag"), crear_hoja(uno_simbolo.nombre));
 
-            //      count := count + 1;
-            count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
-            count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
+            //      count =: count + 1;
+            count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja(uno_simbolo.nombre));
+            count_nodo = crear_nodo("=:", crear_hoja("@count"), count_nodo);
 
             if_flag_nodo = crear_nodo("-IF-", cond_if_flag_nodo, count_nodo);
 
@@ -865,46 +918,49 @@ bc_lista_aritmetica:
                         *cuerpo_if_flag_nodo,
                         *count_nodo;
             
+            char yytext_nombre [MAX_LENGTH]; // _yytext
+            snprintf(yytext_nombre, MAX_LENGTH, "_%s", yytext);
+
             //aux = yytext;
-            asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext));
+            asig_nodo = crear_nodo(":=", crear_hoja("@aux"), crear_hoja(yytext_nombre));
 
             //flag = 0;
-            flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("1"));
+            flag_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("_1"));
 
             //      res := aux % 10;
-            res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("10"));
+            res_nodo = crear_nodo("%", crear_hoja("@aux"), crear_hoja("_10"));
             res_nodo = crear_nodo(":=", crear_hoja("@res"), res_nodo);
             
             //      if(res <> 0 | res <> 1)
-            condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("0"));
-            condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("1"));
+            condif1_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("_0"));
+            condif2_nodo = crear_nodo("<>", crear_hoja("@res"), crear_hoja("_1"));
             condif3_nodo = crear_nodo("OR", condif1_nodo, condif2_nodo);
 
             //            flag := 0;
-            flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("0"));
+            flag_0_nodo = crear_nodo(":=", crear_hoja("@flag"), crear_hoja("_0"));
 
             if_nodo = crear_nodo("-IF-", condif3_nodo, flag_0_nodo);
 
             //      aux := aux / 10;
-            aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
+            aux_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("_10"));
             aux_nodo = crear_nodo(":=", crear_hoja("@aux"), aux_nodo);
 
             cuerpo_if_nodo = crear_nodo("-CUERPO-", if_nodo, aux_nodo);
             cuerpo_res_nodo = crear_nodo("-CUERPO-", res_nodo, cuerpo_if_nodo);
 
             //while(aux > 0):
-            condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("0"));
+            condwhile_nodo = crear_nodo(">", crear_hoja("@aux"), crear_hoja("_0"));
             condwhile_nodo = crear_nodo("-WHILE-", condwhile_nodo, cuerpo_res_nodo);
 
             //aux := aux / 10;
-            aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("10"));
+            aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja("_10"));
             aux2_nodo = crear_nodo(":=", crear_hoja("@aux"), aux2_nodo);
 
             //if(flag == 1)
-            cond_if_flag_nodo = crear_nodo("==", crear_hoja("@flag"), crear_hoja("1"));
+            cond_if_flag_nodo = crear_nodo("==", crear_hoja("@flag"), crear_hoja("_1"));
 
             //      count := count + 1;
-            count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("1"));
+            count_nodo = crear_nodo("+", crear_hoja("@count"), crear_hoja("_1"));
             count_nodo = crear_nodo(":=", crear_hoja("@count"), count_nodo);
 
             if_flag_nodo = crear_nodo("-IF-", cond_if_flag_nodo, count_nodo);

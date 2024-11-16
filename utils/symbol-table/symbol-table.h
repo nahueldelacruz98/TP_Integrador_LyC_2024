@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_LENGTH 40
+#define MAX_LENGTH 50
 
 #define MAX_LENGTH_NOMBRE 41
 #define MAX_LENGTH_TIPO_DATO 13

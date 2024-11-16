@@ -13,16 +13,32 @@ y = binaryCount([110,1,0,5,x,10101100,-1])  // y = 4
     count = 0; -> primera iteracion
     flag = 1;
     int aux = 110;
-    while (aux > 0) {
+
+    while (aux > 1 AND flag == 0) {
         int res = aux % 10;
-        if (res != 0 | res != 1) {
+        if (res != 0 AND res != 1) {
             flag = 0;
         }
-        aux /= 10;
+        aux = aux/10 - (res)/10;
     }
-    if(flag == 1)
+ 
+    if(flag != 0)
+        if(aux == 1 OR aux == 0)
         count = count + 1;
+
+
+    //while (aux > 1) { 
+    //    int res = aux % 10; 
+    //    if (res != 0 & res != 1) {
+    //        flag = 0;
+    //    }
+    //    aux /= 10;
+    //}
+    //if(flag == 1)
+    //    count = count + 1;
     
     
     return count
 }
+
+

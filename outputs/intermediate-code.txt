@@ -1,1 +1,1 @@
- x _434.0 < b _1.0 <= AND a _2.0 > OR a 7 =: j x 32 + =: -SENTENCIA- a b =: -SENTENCIA- -IF- -SENTENCIA-
+ y _2 := -SENTENCIA- write y -ESCRITURA- -SENTENCIA- y @count _0 := @aux _1 := @flag _1 := @aux _0 > @res @aux _10 % =: @res _0 <> @res _1 <> AND @flag _0 := -IF- @aux @aux _10 / =: -CUERPO- -CUERPO- -WHILE- @flag _1 == @count @count _1 + =: -IF- @aux @aux _10 / =: -CUERPO- -CUERPO- -CUERPO- -CUERPO- -CUERPO- -BINARY_COUNT- := -SENTENCIA- write y -ESCRITURA- -SENTENCIA-

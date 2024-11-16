@@ -1,0 +1,8 @@
+init {
+    a, y : Int
+}
+
+y := 2
+escribir(y)
+y := binaryCount([1])
+escribir(y)

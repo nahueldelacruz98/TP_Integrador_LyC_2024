@@ -6,7 +6,7 @@
 2. Abrir DSBOX y ejecutar el comando:
 
 ``
-mount c <<tu directorio>>
+mount c <<tu directorio>> C:\Users\Bryan\Documents\Git\compilador\TP_Integrador_LyC_2024
 ``
 
 Nota: reemplazar "tu directorio" con la ruta absoluta de este directorio.
