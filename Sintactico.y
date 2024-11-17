@@ -874,8 +874,8 @@ bc_lista_aritmetica:
             condwhile_nodo = crear_nodo("-WHILE-", condwhile_nodo, cuerpo_res_nodo);
 
             //aux =: aux / 10;
-            aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja(diez_simbolo.nombre));
-            aux2_nodo = crear_nodo("=:", crear_hoja("@aux"), aux2_nodo);
+            //aux2_nodo = crear_nodo("/", crear_hoja("@aux"), crear_hoja(diez_simbolo.nombre));
+            //aux2_nodo = crear_nodo("=:", crear_hoja("@aux"), aux2_nodo);
 
             //if(flag == 1)
             cond_if_flag_nodo = crear_nodo("==", crear_hoja("@flag"), crear_hoja(uno_simbolo.nombre));
@@ -886,8 +886,8 @@ bc_lista_aritmetica:
 
             if_flag_nodo = crear_nodo("-IF-", cond_if_flag_nodo, count_nodo);
 
-            cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
-            cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, cuerpo_if_flag_nodo);
+            //cuerpo_if_flag_nodo = crear_nodo("-CUERPO-", if_flag_nodo, aux2_nodo);
+            cuerpo_while_nodo = crear_nodo("-CUERPO-", condwhile_nodo, if_flag_nodo);
             cuerpo_flag_nodo = crear_nodo("-CUERPO-", flag_nodo, cuerpo_while_nodo);
             cuerpo_asig_nodo = crear_nodo("-CUERPO-", asig_nodo, cuerpo_flag_nodo);
 

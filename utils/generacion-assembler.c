@@ -210,15 +210,16 @@ char*escribir_nodo_arbol(struct Nodo* nodo, tLista *list_symbol_table){
         if(!strcmp(tipo_dato, "String") || !strcmp(tipo_dato, "CTE_STRING")){
             fprintf(archivo,"\tdisplayString %s\n",valorHojaDer);
         } else if(!strcmp(tipo_dato, "Int") || !strcmp(tipo_dato, "CTE_INTEGER")){
-            fprintf(archivo,"\tDisplayInteger %s\n",valorHojaDer);
+            fprintf(archivo,"\tDisplayFloat %s,2\n",valorHojaDer);
         } else if(!strcmp(tipo_dato, "Float") || !strcmp(tipo_dato, "CTE_FLOAT")){
             fprintf(archivo,"\tDisplayFloat %s,2\n",valorHojaDer);
         }
+        fprintf(archivo,"\tdisplayString %s\n","@salto_linea");
 
     } else if(strcmp(valorNodo,"-GET_PENULTIMATE_POSITION-") == 0) {
         valorNodo = strdup("@res");
     } else if(strcmp(valorNodo,"-BINARY_COUNT-") == 0) {
-        valorNodo = strdup("@res");
+        valorNodo = strdup("@count");
     } else if(esUnComparador(valorNodo) == 0) {
         escribir_valor_assembler(valorHojaIzq);
         escribir_valor_assembler(valorHojaDer);
@@ -332,7 +333,7 @@ void cargar_valor_copro_en_variable(char*variable) {
 }
 
 void escribir_asm_data(tLista *p, FILE *pf) {
-        fprintf(pf, ".DATA\n");
+        fprintf(pf, ".DATA\n@salto_linea db 0Ah, \"$\"\n");
         char buffer[MAX_LENGTH];
         while(*p){
             Simbolo *simbolo = (Simbolo *)(*p)->info;
@@ -347,7 +348,9 @@ void escribir_asm_data(tLista *p, FILE *pf) {
                 fprintf(pf, "\t%s\tdd\t?\n", simbolo->nombre);
             } else if (!strcmp(simbolo->tipo_dato, "CTE_FLOAT")) {
                 fprintf(pf, "\t%s\tdd\t%s\n", simbolo->nombre, simbolo->valor);
-            } else {
+            } else if (!strcmp(simbolo->tipo_dato, "CTE_INTEGER")) {
+                fprintf(pf, "\t%s\tdd\t%s.00\n", simbolo->nombre, simbolo->valor);
+            }else {
                   fprintf(pf, "\t%s\tdd\t%s\n", 
                           simbolo->nombre,
                           strcmp(simbolo->valor, "") ? simbolo->valor : "?");

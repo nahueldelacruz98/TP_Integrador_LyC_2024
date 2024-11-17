@@ -12,33 +12,39 @@ y = binaryCount([110,1,0,5,x,10101100,-1])  // y = 4
 {
     count = 0; -> primera iteracion
     flag = 1;
-    int aux = 110;
+    int aux = 110; 
 
-    while (aux > 1 AND flag == 0) {
-        int res = aux % 10;
-        if (res != 0 AND res != 1) {
+    while (aux > 1) { 
+        int res = aux % 10; 
+        if (res != 0 & res != 1) {
             flag = 0;
         }
-        aux = aux/10 - (res)/10;
+        aux /= 10;
     }
- 
-    if(flag != 0)
-        if(aux == 1 OR aux == 0)
+    if(flag == 1)
         count = count + 1;
-
-
-    //while (aux > 1) { 
-    //    int res = aux % 10; 
-    //    if (res != 0 & res != 1) {
-    //        flag = 0;
-    //    }
-    //    aux /= 10;
-    //}
-    //if(flag == 1)
-    //    count = count + 1;
-    
     
     return count
 }
 
 
+
+
+aux = valor inicial //120
+count = 0
+pot = 1
+
+mientras pot <= aux hacer:
+    pot = pot * 10 //1000
+fin mientras
+
+mientras pot > 1 hacer:
+    pot = pot / 10 //100
+    res = aux / pot  //12                    ; Obtener el dígito más significativo
+    aux = aux - (res * pot)    //0             ; Reducir el número
+    si res cumple condición:
+        count = count + 1       
+    fin si
+fin mientras
+
+resultado = count

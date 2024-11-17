@@ -1,8 +1,8 @@
 init {
     a, y : Int
+    s: String
 }
 
-y := 2
-escribir(y)
+s := "0Ah"
 y := binaryCount([1])
 escribir(y)

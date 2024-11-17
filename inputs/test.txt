@@ -1,102 +1,40 @@
 *- Declaracion de variables -*
 
 init {
-    a1,b1,c1 : Int
-    a2 : String
+    a, b, c: Int
+    d, e: Float
 }
 
-init {
-    a,x,resFloat : Float
-    b,y : String
-    c,d,z : Int
-}
+a := 1
+b =: a + (3*5)
+c =: 9 / a
+d := 1.50
+e := .3
 
-*- Asignacion/Inicializacion de variables -*
-
-x := 0.0
-x := -5.
-x := -9999999999.
-x := 1.
-x := 100.
- 
-x := 0.1
-x := 1.0
-x := 22.22222
-x := 9.000001
-x := 99999.99
-x := 99.
-x := .9999
- 
-x := -0.1
-x := -1.0
-x := -22.22222
-x := -9.000001
-x := -99999.99
-x := -99.
-x := -.9999
- 
-y := "@sdADaSjfla%dfg$&/8()"
-y := "       asldk  fh sjf "
-y := "1"
-y := " "
-y := "2146546534543"
-
-
-*- Operaciones Aritmeticas -*
-
-resFloat =: a + 1 * (b*c - d) / 1.2
-x =: z * 17.1 + 8
- 
 *- Mientras -*
- 
-mientras (x > y AND NOT d < 0) {
 
-    x =: x - 1
-
-}
- 
-mientras (x >= y OR d <> 0) {
-
-    x =: x - 1
-
-    mientras (x > 5) {
-
-        x =: x - 1
-
+mientras (a < b) {
+    a =: a + 10
+    mientras (c < 20) {
+        c =: c + 2
+        si(c == 15) {
+            escribir("C alcanzo 15")
+        } sino {
+            escribir("C es diferente de 15")
+        }
+        mientras (d < 5.0) {
+            d =: d + e
+            si(d > 3.5) {
+                escribir("D supero 3.5")
+                e =: e * 2.0
+            } sino {
+                escribir("D es menor o igual a 3.5")
+            }
+        }
     }
-
-}
- 
-*- Si / Si - sino -*
- 
-si(y <= x) {
-
-        x =: y *2
-
+    si(a > 50) {
+        escribir("A es mayor que 50")
+    } sino {
+        escribir("A sigue siendo menor o igual a 50")
     }
- 
-si(y >= x) {
-
-        y =: y - 1
-
-    }
- 
-si(y == x) {
-
-        y =: y * 1
-} sino {
-        y =: y / 2
 }
-
-*- Entrada y salida -*
-
-leer(a)
-escribir("Hola mundo")
-
-*- Funciones especiales -*
-
-a := getPenultimatePosition([3, 8.2, 2, 55.5])
-b := getPenultimatePosition([123456789])
-
-c := binaryCount([110,1,0,5,x,10101100,-1]) 
-d := binaryCount([b])
