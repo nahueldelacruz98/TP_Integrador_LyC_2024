@@ -32,6 +32,11 @@ include macros2.asm
 	_50	dd	50.00
 	_A_es_mayor_que_50	db	"A es mayor que 50",'$', 17 dup (?)
 	_A_sigue_siendo_menor_o_igual_a_50	db	"A sigue siendo menor o igual a 50",'$', 33 dup (?)
+	_NULL	dd	0.00
+	@aux	dd	?
+	@res	dd	?
+	_8	dd	8.00
+	_Ante_ultima_posicion__3__8__2_	db	"Ante ultima posicion [3, 8, 2]",'$', 30 dup (?)
 
 .CODE
 START:
@@ -146,6 +151,24 @@ ET_END_IF_5:
 ET_END_IF_6:
 	JMP ET_START_WHILE_1
 ET_END_WHILE_1:
+	FLD _3
+	FSTP @aux
+	FLD _NULL
+	FSTP @res
+	FLD @aux
+	FSTP @res
+	FLD _8
+	FSTP @aux
+	FLD @aux
+	FSTP @res
+	FLD _2
+	FSTP @aux
+	FLD @res
+	FSTP a
+	displayString _Ante_ultima_posicion__3__8__2_
+	displayString @salto_linea
+	DisplayFloat a,2
+	displayString @salto_linea
 
 	MOV AX, 4C00h
 	INT 21h

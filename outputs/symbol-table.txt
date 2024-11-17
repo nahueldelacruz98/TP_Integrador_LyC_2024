@@ -23,3 +23,8 @@ _D_es_menor_o_igual_a_3_5               CTE_STRING  D es menor o igual a 3.5    
 _50                                     CTE_INTEGER 50                                     0         
 _A_es_mayor_que_50                      CTE_STRING  A es mayor que 50                      17        
 _A_sigue_siendo_menor_o_igual_a_50      CTE_STRING  A sigue siendo menor o igual a 50      33        
+_NULL                                   CTE_INTEGER 0                                      0         
+@aux                                    Int                                                0         
+@res                                    Int                                                0         
+_8                                      CTE_INTEGER 8                                      0         
+_Ante_ultima_posicion__3__8__2_         CTE_STRING  Ante ultima posicion [3, 8, 2]         30        

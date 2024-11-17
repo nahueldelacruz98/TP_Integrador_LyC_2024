@@ -38,3 +38,7 @@ mientras (a < b) {
         escribir("A sigue siendo menor o igual a 50")
     }
 }
+
+a := getPenultimatePosition([3, 8, 2])
+escribir("Ante ultima posicion [3, 8, 2]")
+escribir(a)
